@@ -21,10 +21,10 @@ timezone: Asia/Riyadh
 
 title: DeepNotes                          # the main title
 
-tagline: A blog for deep learning and python related content   # it will display as the sub-title
+tagline: A personal blog   # it will display as the sub-title
 
 description: >-                        # used by seo meta and the atom feed
-  A blog dedicated for Python, Machine Learning and Deep Learning content
+  An Educational blog dedicated to Python, Machine Learning and Deep Learning content
 
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
 url: 'https://magedsaeed.github.io'
