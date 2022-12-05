@@ -51,23 +51,23 @@ jobs:
           pip install -r requirements.txt
           python3 deploy.py
       
-      - name: Push generated posts to the repo
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with: 
-          commit_message: Add generated posts
-          branch: master
-          # file_pattern: '_posts/*'
-          add_options: '--all'
-          repository: .
-          status_options: '--untracked-files=all'
-          commit_options: '--all
-'
-          push_options: '--force'
-          # Optional. Skip internal call to `git fetch`
-          skip_fetch: true
-          # Optional. Skip internal call to `git checkout`
-          skip_checkout: true
-          disable_globbing: true
+#       - name: Push generated posts to the repo
+#         uses: stefanzweifel/git-auto-commit-action@v4
+#         with: 
+#           commit_message: Add generated posts
+#           branch: master
+#           # file_pattern: '_posts/*'
+#           add_options: '--all'
+#           repository: .
+#           status_options: '--untracked-files=all'
+#           commit_options: '--all
+# '
+#           push_options: '--force'
+#           # Optional. Skip internal call to `git fetch`
+#           skip_fetch: true
+#           # Optional. Skip internal call to `git checkout`
+#           skip_checkout: true
+#           disable_globbing: true
 
       - name: Build site
         run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"
