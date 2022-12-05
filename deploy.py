@@ -6,6 +6,7 @@ import inspect
 import json
 from datetime import datetime
 import pdfkit
+from slugify import slugify
 
 ###################################################
 # UTILITIES FUNCTIONS
@@ -167,6 +168,14 @@ def generate_notebooks_table_in_readme(
         rows_str = make_markdown_table(rows=rows)
         file.write(rows_str)
 
+@func_with_logging
+def replace_images_urls_in_markdown(notebook_title,log_message='Fix asset issue in markdown file'):
+    with open(f'notebooks/{notebook_title}/notebook.md','r') as file:
+        file_content = file.read()
+    file_content = file_content.replace('](assets/','](/assets/')
+    with open(f'notebooks/{notebook_title}/notebook.md','w') as file:
+        file.write(file_content)
+
 
 ###################################################
 # DEPLOYMENT COMMANDS
@@ -181,57 +190,54 @@ for notebook in notebooks:
         notebook_link[notebook_link.index("drive/") :].split("/")[1].split("?")[0]
     )
     notebook_title = notebook["title"]
-    notebook_title_escaped = re.escape(notebook_title)  # to escape special characters
+    notebook_title_slugified = slugify(notebook_title)  # to escape special characters
 
     execute_command(
-        command=rf'''mkdir -p "notebooks/{notebook_title}"''',
+        command=rf'''mkdir -p "notebooks/{notebook_title_slugified}"''',
         log_message="Creating notebook directory",
     )
 
     get_notebook_file(
-        notebook_title=notebook_title,
+        notebook_title=notebook_title_slugified,
         notebook_file_id=notebook_file_id,
     )
 
     execute_command(
-        command=f'''jq -M 'del(.metadata.widgets)' "notebooks/{notebook_title}/notebook.ipynb" > "notebooks/{notebook_title}/notebook_no_metadata.ipynb"''',
+        command=f'''jq -M 'del(.metadata.widgets)' "notebooks/{notebook_title_slugified}/notebook.ipynb" > "notebooks/{notebook_title_slugified}/notebook_no_metadata.ipynb"''',
         log_message="remove colab metadata for save html conversion. make sure jq tool is installed",
     )
 
     convert_notebook_to_format(
-        notebook_title=notebook_title,
+        notebook_title=notebook_title_slugified,
         format="html",
     )
 
     convert_to_pdf(
-        input_path=f"notebooks/{notebook_title}/notebook.html",
-        output_path=f"notebooks/{notebook_title}/notebook.pdf",
+        input_path=f"notebooks/{notebook_title_slugified}/notebook.html",
+        output_path=f"notebooks/{notebook_title_slugified}/notebook.pdf",
     )
 
     convert_notebook_to_format(
-        notebook_title=notebook_title,
+        notebook_title=notebook_title_slugified,
         format="markdown",
         file_extension="md",
     )
 
     add_markdown_metadata(
-        notebook_title=notebook_title,
+        notebook_title=notebook_title_slugified,
         notebook_data=notebook,
     )
-
-    execute_command(
-        command="""mkdir -p _posts/assets""",
-        log_message="create assets director in _posts, if not exists",
-    )
+    
+    replace_images_urls_in_markdown(notebook_title=notebook_title_slugified)
 
     # https://stackoverflow.com/a/46346719/4412324
     execute_command(
-        command=rf"""cp -RL "notebooks/{notebook_title}/assets/{notebook_title}" "_posts/assets" """,
-        log_message="""copy notebook assets to _posts directory""",
+        command=rf"""cp -RL "notebooks/{notebook_title_slugified}/assets/{notebook_title_slugified}" "assets" """,
+        log_message="""copy notebook assets to assets directory""",
     )
 
     execute_command(
-        command=rf"""mv "notebooks/{notebook_title}/notebook.md" "_posts/{str(datetime.now().date())}-{notebook_title.replace(' ','-')}.md" """,
+        command=rf"""mv "notebooks/{notebook_title_slugified}/notebook.md" "_posts/{str(datetime.now().date())}-{notebook_title_slugified.replace(' ','-')}.md" """,
         log_message="""moving the markdown file to _posts directory""",
     )
 
