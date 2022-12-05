@@ -19,9 +19,9 @@ timezone: Asia/Riyadh
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: DeepNotes                          # the main title
+title: MagedSaeed                          # the main title
 
-tagline: A personal blog   # it will display as the sub-title
+tagline: A personal site for programming and data science content   # it will display as the sub-title
 
 description: >-                        # used by seo meta and the atom feed
   An Educational blog dedicated to Python, Machine Learning and Deep Learning content
@@ -42,8 +42,8 @@ social:
   email: mageedsaeed1@gmail.com             # change to your email address
   links:
     # The first element serves as the copyright owner's link
-    - https://twitter.com/_magedsaeed_      # change to your twitter homepage
     - https://github.com/magedsaeed       # change to your github homepage
+    - https://twitter.com/_magedsaeed_      # change to your twitter homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
@@ -81,7 +81,7 @@ theme_mode:   # [light|dark]
 img_cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar:
+avatar: https://avatars.githubusercontent.com/u/18549783?v=4
 
 # boolean type, the global switch for ToC in posts.
 toc: true
