@@ -1,0 +1,12 @@
+[
+    {
+        "title":"English Words Frequency as a Regression Fit, Implemented with Pytorch",
+        "link":"https://colab.research.google.com/drive/1kWFyHsBMrlG7B_LbcaEQaObxYGT6U81m?usp=sharing",
+        "author":"Maged S. Al-Shaibani",
+        "categories":["Regression"],
+        "tags":["NLP","PyTorch","Regression"],
+        "math":true,
+        "mermaid":true,
+        "description":"This is some description"
+    }
+]
