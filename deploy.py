@@ -1,11 +1,12 @@
-import sys
-import re
-import subprocess
-import requests
 import inspect
 import json
+import re
+import subprocess
+import sys
 from datetime import datetime
+
 import pdfkit
+import requests
 from slugify import slugify
 
 ###################################################
@@ -168,12 +169,27 @@ def generate_notebooks_table_in_readme(
         rows_str = make_markdown_table(rows=rows)
         file.write(rows_str)
 
+
 @func_with_logging
-def replace_images_urls_in_markdown(notebook_title,log_message='Fix asset issue in markdown file'):
-    with open(f'notebooks/{notebook_title}/notebook.md','r') as file:
+def replace_images_urls_in_markdown(
+    notebook_title, log_message="Fix asset issue in markdown file"
+):
+    with open(f"notebooks/{notebook_title}/notebook.md", "r") as file:
         file_content = file.read()
-    file_content = file_content.replace('](assets/','](/assets/')
-    with open(f'notebooks/{notebook_title}/notebook.md','w') as file:
+    file_content = file_content.replace("](assets/", "](/assets/")
+    with open(f"notebooks/{notebook_title}/notebook.md", "w") as file:
+        file.write(file_content)
+
+
+@func_with_logging
+def replace_http_with_https(
+    notebook_title,
+    log_message="replace http with https to ensure https connection",
+):
+    with open(f"notebooks/{notebook_title}/notebook.html", "r") as file:
+        file_content = file.read()
+    file_content = file_content.replace("http://", "https://")
+    with open(f"notebooks/{notebook_title}/notebook.html", "w") as file:
         file.write(file_content)
 
 
@@ -212,6 +228,8 @@ for notebook in notebooks:
         format="html",
     )
 
+    replace_http_with_https(notebook_title=notebook_title_slugified)
+
     convert_to_pdf(
         input_path=f"notebooks/{notebook_title_slugified}/notebook.html",
         output_path=f"notebooks/{notebook_title_slugified}/notebook.pdf",
@@ -227,7 +245,7 @@ for notebook in notebooks:
         notebook_title=notebook_title_slugified,
         notebook_data=notebook,
     )
-    
+
     replace_images_urls_in_markdown(notebook_title=notebook_title_slugified)
 
     # https://stackoverflow.com/a/46346719/4412324
