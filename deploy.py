@@ -3,7 +3,6 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime
 
 import pdfkit
 import requests
@@ -255,7 +254,7 @@ for notebook in notebooks:
     )
 
     execute_command(
-        command=rf"""mv "notebooks/{notebook_title_slugified}/notebook.md" "_posts/{str(datetime.now().date())}-{notebook_title_slugified.replace(' ','-')}.md" """,
+        command=rf"""mv "notebooks/{notebook_title_slugified}/notebook.md" "_posts/{notebook['publication_date']}-{notebook_title_slugified.replace(' ','-')}.md" """,
         log_message="""moving the markdown file to _posts directory""",
     )
 
