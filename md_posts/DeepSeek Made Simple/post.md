@@ -1,25 +1,32 @@
 # Introduction
 
-In January 2025, DeepSeek, a Chinese startup, unveiled its revolutionary AI model, shocking the landscape of artificial intelligence with its outstanding performance compared to its cost. Alongside their model release, they released a mobile app that allows users to chat with the AI model in real time similar to ChatGPT and Anthropic. Their app has gathered over 10 million downloads on the Google Play Store within its first three weeks of release!
+In January 2025, DeepSeek, a Chinese startup, unveiled its revolutionary AI model, transforming the artificial intelligence landscape with its exceptional performance-to-cost ratio compared to US and other West AI models. Alongside their model release, they launched a mobile app enabling real-time AI interactions similar to ChatGPT and Anthropic's offerings. The app cultivated over 10 million downloads on the Google Play Store within its first three weeks of release. Its rocketing growth reminds of the ChatGPT app initial growth on its first days.
 
-Why DeepSeek's R1 gained such popularity? Well, the model delivers an impressive, on-par performance compared to the leading U.S. and west AI counterparts like Llama and Mixtral covering closed source ones as well (OpenAI's ChatGPT, the most recent O1 version, and Anthropic Claude Sonnet 3.5), if not surpassing it. They deliver such performance with a more than 90% cost reduction! causing a massive disrupt in the markets, leading to erasing $1 trillion in value! Notably, Nvidia, the GPU chips industry leader, experienced a record-breaking $600 billion loss in market capitalization, marking the largest single-company loss in U.S. stock market history. What is even more interesting is that they published their work as an open-source. The model is published under an MIT license, making it a commercially viable option with proper compute. Their experimental work is also well described on published research papers for both of their work: DeepSeek R1 and DeepSeek V3 with all of its previous versions. Making a giant leap for open source progress in the AI race with closed source enterprise.
+What drove DeepSeek's R1 to such popularity? Well, the model delivers impressive performance comparable to leading Western AI counterparts like Llama and Mixtral with a surprisingly cost cutoffs. Interestingly, the model even rivals the closed-source models, OpenAI's ChatGPT o1 (that is very recently released) and Anthropic's Claude 3.5 Sonnet. In some settings, it even surpasses them. Most notably, they achieved this while reducing costs by more than 90%, causing significant market disruption that led to approximate collapse of $1 trillion in market value. Nvidia, the GPU industry leader, experienced an unprecedented $600 billion loss in market capital, marking the largest single-company loss in U.S. stock market history!
 
-"**But Wait**" how DeepSeek were able to achieve such impressive performance Given the Chaina's export controls? Note that they claimed that they trained this model on a cluster of 2048 Nvidia H800 GPUs. These GPUs are less efficient to its powerful sibling: Nvidia H100. It turns out they achieved this by incorporating many training tricks and advances. What is even more interesting is the introduction of Reinforcement Learning as an innovative approach to improving performance. They were the first to show that Reinforcement Learning works at this large scale of LLMs development making a good end for all the previous stories and trials in this direction. In this article, I am going to illustrate how this model was trained with a bit of in-depth technicality. This will also cover how its elder brother DeepSeek V3 are developed as this is important to grasp the full picture. For deep dives, better to give an in-depth read to the developers' technical report they released.
+Perhaps most significantly, DeepSeek published their work as open-source under an MIT license. This makes their models commercially permissible given the compute. Additionally, their experimental work is thoroughly well-documented in published technical reports covering both DeepSeek R1 and DeepSeek V3, including all of its previous versions. Such initiative represents a major advancement for open-source progress in the AI race against closed-source AI enterprises.
 
-The content of this article first presents a preamble with some terminologies so that we all stand on common ground. It then introduces DeepSeek-R1. DeepSeek-V3 is later introduced as it plays a major role in developing R1. Having a good backround on its development completes the picture.
+**But Wait! _There is an Ahaa moment that I can flag here!_** How did DeepSeek achieve such impressive performance given China's export controls? Note that the company reported training this model on a cluster of 2,048 Nvidia H800 GPUs. These GPUs are less efficient than their powerful sibling, the Nvidia H100. While this is still a skeptical side of the story for many, especially conspiracy theorists, given the current US-China rivalry, one aspect of this notable performance boost is their through and numerous training innovations, advances and brilliant engineering efforts with various experimentation and ablation studies. In fact, they introduced wild conclusions. For instance, Reinforcement Learning can successfully replace the supervised fine-tuning phase of LLMs development pipeline. This step is usually a tedious task to collect high quality and typically involves cumbersome human annotation.
+
+In this article, I will explain how this model was trained with some technical depth and what makes it unique among its counterparts. This will also cover the development of its predecessor, DeepSeek V3, as understanding both is instrumental for grasping the complete picture. For deeper insights, readers are encouraged to review the developers' technical reports.
+
+This article begins with a preamble introducing key terminology to establish common ground. It then discusses DeepSeek-R1, followed by DeepSeek-V3.
 
 # Preamble and Terminologies
 
-Before star diving further, it is helpful to state the terminologies used so that both of us (me and you) are on landing on common ground.
+Before diving deeper, it's useful to establish a common ground so that both of us can follow the technical discussion with a clear alignment to the context. This preamble will introduce three main topics that are relative to our discussion: The typical LLM development pipeline, and MoE architecture.
 
 ## An LLM Development Pipeline
 
-The current development of the production-grade LLMs undergoes the following steps:
+The development of production-grade LLMs typically involves the following steps:
 
-- Building a massive dataset of text (usually with trillion tokens). This dataset is just a text, like books, articles, high-quality web content, wiki pages, etc.
-- Build and train a transformer-based model for the next-token generation objective on the built dataset. The resulting trained model should be smart enough to predict the best next token given a previous sequence of tokens. This model is usually called a base model.
-- The base model is taking another round of fine-tuning. This fine-tuning is called supervised fine-tuning or SFT in short. The model in this stage is trained on datasets from downstream natural language processing tasks like question answering, sentiment analysis, machine translation, text classification, language understanding, and comprehension. These datasets are usually of special formats having two pairs apart: the input and the output. The model is fine-tuned to produce the output given the input.
-- While the model seems to be ready for public use by the last step. However, it undergoes another step, an alignment step. This step is concerned with teaching the model to align its output to human preferences. That is: the model should not produce harmful, offensive, or disrespectful content. The model, in this step, is usually trained with a special process called Reinforcement Learning from Human Feedback (RHLF). The resulting model after this step is a production-ready LLM, sometimes called a Chat model, like ChatGPT. In some cases, this step is merged with the previous step and the model is just called an instruct model where it covers both fine-tuning and alignment steps.
+- **Dataset Creation:** Building a massive text dataset (usually containing trillions of tokens) comprising books, articles, high-quality web content, wiki pages, and other text sources. Nothing fancy here. The main focus in this stage is on collecting high-quality data with meticulous preprocessing to ensure the quality constrains.
+
+- **Base Model Training:** Developing and training a transformer-based model for the next-token prediction objective on the collected dataset. The resulting trained model (usually called a base model) should be smart enough to predict the most probable next token given a sequence of previous tokens.
+
+- **Supervised Fine-tuning (SFT):** The base model undergoes additional fine-tuning on datasets from downstream natural language processing tasks such as text classification, question answering, sentiment analysis, machine translation, language understanding, and language comprehension. These datasets follow a specific format with input-output pairs, and the model is fine-tuned to generate appropriate outputs for given inputs. In this stage, the model is trained with a variety of prompts to help generalizing to input quires variations.
+
+- **Alignment:** While the model seems to be ready for the public use from the previous step, this final step ensures the model aligns its output with human preferences by avoiding harmful, offensive, or disrespectful content. This typically involves a process called Reinforcement Learning from Human Feedback (RLHF) where the model is tuned to follow human preferences. The resulting model after this step is a production-ready LLM, often called a Chat model (like ChatGPT). In some cases, this step is combined with the previous fine-tuning step, resulting in what's called an instruct model.
 
 ![Figure 1: LLM Development Pipeline](assets/llm-development-pipeline.png)
 
@@ -27,23 +34,21 @@ The current development of the production-grade LLMs undergoes the following ste
 
 ## MoE architecture
 
-DeepSeek V3 is a Mixture of Experts (MoE) architecture. What does this mean? The Mixture of Experts (MoE) architecture is a design where multiple specialized subnetworks (the experts) are trained together during training but one or few of them are selected during inference. The hypothesis is that each one of these experts is expected to be better and proficient at handling different types of inputs or tasks. During inference where the user interacts with the model, based on the experience gained during training, the MoE architecture will select the expert via its gating mechanism that is best suited to process the input. This gating mechanism is usually another network that learns to route incoming inputs to the most appropriate expert(s), acting like a smart traffic controller that directs each input to the expert or a group of experts best suited to process it.
+DeepSeek V3 employs a Mixture of Experts (MoE) architecture. This design incorporates multiple specialized subnetworks (experts) trained together, with only a subset activated during inference. Each expert develops proficiency in processing different types of inputs or tasks. During user interaction, the architecture's gating mechanism routes to the most appropriate expert(s) based on the input.
 
-A common misconception about MoE is that each expert specializes in a specific domain (like one expert for math, another for creative writing, etc.). While this specialization could theoretically happen, it's not how MoE is typically implemented in practice, i.e not the widely adapted approach. The experts are neural subnetworks that learn to process different patterns in the data, rather than being explicitly trained for domain specialization. Additionally, these experts are not separate small language models, they are components within the larger network, though theoretically, they could be implemented as individual LLMs as well.
+A common misconception about MoE is that experts specialize in specific domains (like mathematics or creative writing). While theoretically possible (and already tried, see: [Branch-Train-MiX: Mixing Expert LLMs into a Mixture-of-Experts LLM](https://arxiv.org/html/2403.07816v1)), practical implementations typically have experts learn to process different data patterns rather than explicit domain specialization. These experts are integrated components within the larger network, not separate language models, though they could theoretically be implemented as individual LLMs.
 
-MoE architecture is not a new concept. It actually dates back to 1991. However, it is now making new waves as it has proven promising in large-scale settings of LLMs with the Mixtral LLMs series. For the transformer architecture, experts replace the feedforward network that is placed after the attention and its norm layer.
+The MoE concept dates back to 1991 (Introduced in this paper: [Adaptive Mixture of Local Experts](https://www.cs.toronto.edu/~fritz/absps/jjnh91.pdf)) but has gained renewed attention through its successful application in large-scale LLMs, particularly with the introduction of Mixtral LLMs. In transformer architecture, experts replace the feedforward network positioned after the attention and normalization layers.
 
 ![Figure 2: Mixture of Experts Architecture](assets/MoE.png)
 
 *Figure 2: Mixture of Experts in a Transformers architecture*
 
-Why is this architecture useful? the architecture of course has its own pros and cons. However, a prominent point why it is useful is because it is a cost-effective approach during inference time while allowing the model to experience a wide range of learning combinations during training time. That is, during training, many experts are trained. However, during inference, only a few of them get activated to respond to user queries. DeepSeek's architecture is an MoE model with a total of 671B parameters with only 37B activated during inference. Although this is coming at a huge cost where the whole model (all 671B) needs to be loaded on the GPU VRAM in order to run the whole model.
-
-
+The MoE architecture offers distinct advantages and challenges. Its primary benefit lies in cost-effective inference while enabling comprehensive learning during training. DeepSeek's architecture contains 671B total parameters, but only 37B are activated during inference. However, this efficiency comes with a trade-off: the entire model (all 671B parameters) must remain loaded in GPU VRAM for operation. Furthermore, training this architecture is associated with challenges. An example of such challenges is the following question: how to effecentinly load-balance the experts load during training so that the gating network does high-favor only few experts, low-favoring the rest?
 
 # DeepSeek R1
 
-DeepSeek-R1 marks a landmark in AI development timeline. It is the first model that shows Reinforcement Learning can work in a large-scale setting without the need to collect high-quality SFT data as in the typical pipeline in Figure 1. This has been prominently proven with DeepSeek-R1-Zero model (explained next) where it proved that pure reinforcement learning could yield impressive result. However, its capabilities outside reasoning domains are hindered. While DeepSeek-R1 is meant to be a general-use model with polished, user-friendly outputs suitable for general public use, they performed some refinements combining the best from both models DeepSeek-V2 and DeepSeek-R1-Zero. DeepSeek R1 development pipeline can be very briefly illustrated in the following sequence of steps:
+DeepSeek-R1 marks a landmark in AI development timeline. It is the first model that shows Reinforcement Learning can work in a large-scale setting replacing the collection of high-quality SFT data as in the typical pipeline in Figure 1. This has been prominently proven with DeepSeek-R1-Zero model (explained next) where it proved that pure reinforcement learning could yield impressive result eliminating the need for SFT. This comes with the cost that its capabilities outside reasoning domains are hindered. While DeepSeek-R1 is meant to be a general-use model with polished, user-friendly outputs suitable for general public use, they performed some refinements combining the bests from both models DeepSeek-V2 and DeepSeek-R1-Zero. DeepSeek R1 development pipeline can be very briefly illustrated in the following sequence of steps:
 
 1. SFT Cold Start fine-tuning of DeepSeek V3-Base -> DeepSeek-V3-Cold-Start
 2. RL training on DeepSeek-V3-Cold-Start -> DeepSeek-V3-RL.
@@ -55,15 +60,13 @@ DeepSeek-R1 marks a landmark in AI development timeline. It is the first model t
 
 *Figure 3: DeepSeek-R1 development pipeline*
 
-
 Discussing in further details, they start by fine-tuning DeepSeek-V3-base with data they called cold start data. This data consists of thousands of high-quality SFT data. The reasoning SFT data was collected via few-shot prompting with long CoT DeepSeek-R1-Zero. The generated samples undergo verification steps extending to human annotators to maintain a high-quality constraints. This seems to play a major role in giving the model an overview of SFT data settings, beside, of course, its important role of maintaining stable fine-tuning for the upcoming phases alternating between SFT and reasoning setups. 
 
-After this initial training, they moved on to the reinforcement learning phase, but with a twist. They added a new type of reward - a language consistency reward. Why? Because they noticed R1-Zero had a habit of mixing languages. This new reward encouraged the model to stick to one language and follow a specific format throughout its response. Sure, this slightly reduced the model's raw performance, but it made the outputs much more readable and user-friendly.
+After this initial training, they moved on to the reinforcement learning phase, but with a twist. They added a new type of reward - a language consistency reward. Why? Because they noticed R1-Zero developed the habit of mixing languages while trying to reach the final answer. While this can be an emergent capability to learn from various lingual representation during the CoT (thinking) process, this kind of output is not user-friendly. This new reward encouraged the model to stick to one language and follow a specific format throughout its response. Sure, this slightly reduced the model's raw performance, but it made the outputs much more readable and user-friendly.
 
-Once the first round of RL training converged (meaning the model got really good at reasoning), they used this improved model to generate new training data. But they were picky about it - they only kept the best responses, filtering out anything with mixed languages, overly long paragraphs, or messy code blocks. They combined this with some regular language tasks (like writing and answering questions) to create a more well-rounded training set.
+Once the first round of RL training converged (meaning the model got really good at reasoning), they used this improved model to generate new training data. But they were picky about it - they only kept the best responses, filtering out anything with mixed languages, overly long paragraphs, or messy code blocks through rejection sampling. They combined this with some regular language tasks (like writing and answering questions) to create a more well-rounded training set.
 
 This iterative approach paid off. The final model, DeepSeek-R1, almost maintains all the impressive reasoning capabilities of R1-Zero but presents its solutions in a much more user-friendly way. It's like taking that brilliant but chaotic professor and teaching them how to explain things clearly to their students!
-
 
 ## DeepSeek-R1-Zero
 
@@ -92,6 +95,27 @@ However, it wasn't all perfect. R1-Zero had its own downsides too: its outputs c
 
 These limitations led the team to develop a more refined version, the R1 version with the above described pipeline (in Figure 3). But R1-Zero proved something important: pure reinforcement learning can teach a model to reason, and sometimes, just letting an AI figure things out on its own leads to surprisingly near-human behaviors.
 
+
+## R1 distillation to small models
+
+After developing R1, DeepSeek explored another practical angle to leverage such advances to the small, more economical models arena. Basically, they tried to approach the following two questions:
+
+- What is the effect of reasoning data fine-tuning on the economical LLMs?
+- Are economical LLMs better trained from scratch with reinforcement learning or distill knowledge from powerful large reasoners?
+
+By distillation, the smaller model will be fine-tuned on the large LLM reasoner outputs. For fine-tuning, the collected 800,000 samples from R1 and use them to fine-tune various smaller models, ranging from tiny 1.5B parameter versions to larger 70B ones using both Qwen and Llama architectures.
+
+The results were surprising. Their 7B model (DeepSeek-R1-Distill-Qwen-7B) outperformed GPT-4o-0513 across benchmarks, while their 14B version surpassed QwQ-32B-Preview despite being less than half its size. Most impressively, their 32B model achieved 72.6% on AIME 2024, 94.3% on MATH-500, and 57.2% on LiveCodeBench.
+
+Another key finding they report from their experiments: distilling knowledge from R1 worked better than trying to train smaller models directly with reinforcement learning. When they applied R1-Zero's RL approach to a 32B model, it only matched QwQ-32B-Preview's performance. But the distilled version significantly outperformed both, suggesting that transferring knowledge from larger models is more effective than training smaller ones from scratch.
+
+
+To give a concise summary, DeepSeek introduces the following **Ahaa moments in the LLMs research community:**
+
+- Reinforcement Learning can completely replace supervised fine-tuning phase of LLMs development pipeline. However, cold-start data can be added for training and fine-tuning stability.
+- Although current approaches for (RHLF) uses a reward model to score model responses then fine tune the LLM with this reward model using optimization methods like PPO, they showed that GRPO alone can perform both by scoring multiple LLM responses and score them relative to each other.
+- They showed that LLMs can be good SFT data generators.
+- They showed that distilling strong reasoning LLM to smaller models is more promising than training the small model with reinforcement learning.
 
 # DeepSeek V3
 
@@ -134,12 +158,17 @@ The team improved over this mixed-precision framework by introducing a fine-grai
 
 Among of the other tricks to introduce is the use of a smart accumulation strategy where intermediate computations are promoted to higher precision at regular intervals. This ensures that despite using FP8 for most operations, the critical accumulation of gradients remains accurate.
 
-## Post-Training Enhancements
+## Post-Training stage
 
-DeepSeek-V3 undergoes an extensive post-training phase. Reading this section and the R1 paper, It seems that (my personal opinion) this section of the V3 paper is introduced almost twice with many overlaps in the R1 paper.My feeling is that the whole part of reinforcement learning got rewritten with further depth and evaluation in R1 paper. The R1 paper is just an extention to this section of the V3 paper with the detailed introduction of DeepSeek-R1-Zero. Here is an overview of the steps of V3 post training.
+DeepSeek-V3 undergoes an extensive post-training phase. Reading this section and the R1 paper, It seems that (my personal opinion) this section of the V3 paper is introduced almost twice with many overlaps in the R1 paper.My feeling is that the whole part of reinforcement learning got rewritten with further depth and evaluation in R1 paper. The R1 paper is just an extension to this section of the V3 paper with the detailed introduction of DeepSeek-R1-Zero. Here is an overview of the steps of V3 post training.
 
 The first stage is Supervised Fine-Tuning (SFT), where the team curates a diverse dataset of 1.5M instances. They collected two kinds of data: reasoning-based and general language use data. For reasoning-related tasks (like mathematics and coding), they generated this data from DeepSeek-R1. While R1-generated data shows high accuracy, it tends to be overly verbose with excessive steps. To alleviate these challenges, they followed the following methodology. They generate two types of samples for each instance: one with the original response format and another incorporating R1's response with a system prompt designed to encourage reflection and verification patterns. The model, then, started an enforcement learning phase with this data. Finally, they applied rejection sampling to only select high quality SFT reasoning data.
 
 In the reinforcement learning phase, rewards can be constructed from two sources with regard to the type of data. For data with closed-form answers, like math and code datasets where the output is usually in close format, the reward is based on whether the model reached to the correct answer or not. For the open-ended questions, they employed a model-reward method where the used the GRPO optimization introduced in their DeepSeekMath paper to update the model policy. This optimization will punish the model if it wend far from the expected output distribution or it went far from the expect output format they provided. The distribution distance is measured with the KL divergence score which measures the distance between two distributions.
 
 The post-training phase concludes with various evaluations and optimizations. The results show impressive performance improvements, particularly in reasoning tasks. For instance, on LiveCodeBench-CoT, the model improves from 31.1% to 37.4% pass rate, and on MATH-500, accuracy jumps from 74.6% to 83.2%. However, these gains come with a trade-off - longer response lengths, which the team carefully balances through optimal distillation settings to maintain computational efficiency.
+
+
+# Useful Links and resources:
+- [The History of Mixture of Experts](https://www.linkedin.com/pulse/history-mixture-experts-upp-technology-ok9re/)
+- [DeepSeek-R1: RL for LLMs Rethought](https://thegrigorian.medium.com/deepseek-r1-rl-for-llms-rethought-e148445d4381)
