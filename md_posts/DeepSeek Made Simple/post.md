@@ -61,7 +61,13 @@ DeepSeek-R1 marks a landmark in AI development timeline. It is the first model t
 *Figure 3: DeepSeek-R1 development pipeline*
 
 
-We will start first by introducing DeepSeek-R1-Zero as this model is a corner-stone model in developing R1. We will then talk in details how R1 is built.
+Discussing in further details, they start by fine-tuning DeepSeek-V3-base with data they called cold start data. This data consists of thousands of high-quality SFT data. The reasoning SFT data was collected via few-shot prompting with long CoT DeepSeek-R1-Zero. The generated samples undergone verification steps extending to human annotators to maintain a high quality constraints. This seems to play a major role in giving the model an overview of SFT data settings, beside, of course, its important role of maintaining stable fine-tuning for the upcoming phases alternating between SFT and reasoning setups. 
+
+After this initial training, they moved on to the reinforcement learning phase, but with a twist. They added a new type of reward - a language consistency reward. Why? Because they noticed R1-Zero had a habit of mixing languages. This new reward encouraged the model to stick to one language and follow a specific format throughout its response. Sure, this slightly reduced the model's raw performance, but it made the outputs much more readable and user-friendly.
+
+Once the first round of RL training converged (meaning the model got really good at reasoning), they used this improved model to generate new training data. But they were picky about it - they only kept the best responses, filtering out anything with mixed languages, overly long paragraphs, or messy code blocks. They combined this with some regular language tasks (like writing and answering questions) to create a more well-rounded training set.
+
+This iterative approach paid off. The final model, DeepSeek-R1, almost maintains all the impressive reasoning capabilities of R1-Zero but presents its solutions in a much more user-friendly way. It's like taking that brilliant but chaotic professor and teaching them how to explain things clearly to their students!
 
 
 ## DeepSeek-R1-Zero
@@ -90,16 +96,6 @@ What's particularly interesting is how the model naturally learned to use longer
 However, it wasn't all perfect. R1-Zero had its own downsides too: its outputs could be hard to read, it would sometimes mix different languages in the same response (imagine getting a math solution that randomly switches between English and Chinese!), and its formatting wasn't always user-friendly. Think of it like a brilliant but slightly chaotic professor who solves problems brilliantly but writes their solutions in a way that only they can fully understand.
 
 These limitations led the team to develop a more refined version, the R1 version with the above described pipeline (in Figure 3). But R1-Zero proved something important: pure reinforcement learning can teach a model to reason, and sometimes, just letting an AI figure things out on its own leads to surprisingly near-human behaviors.
-
-## Building DeepSeek-R1 
-
-Discussing in further details, they start by fine-tuning DeepSeek-V3-base with data they called cold start data. This data consists of thousands of high-quality SFT data. The reasoning SFT data was collected via few-shot prompting with long CoT DeepSeek-R1-Zero. The generated samples undergone verification steps extending to human annotators to maintain a high quality constraints. This seems to play a major role in giving the model an overview of SFT data settings, beside, of course, its important role of maintaining stable fine-tuning for the upcoming phases alternating between SFT and reasoning setups. 
-
-After this initial training, they moved on to the reinforcement learning phase, but with a twist. They added a new type of reward - a language consistency reward. Why? Because they noticed R1-Zero had a habit of mixing languages. This new reward encouraged the model to stick to one language and follow a specific format throughout its response. Sure, this slightly reduced the model's raw performance, but it made the outputs much more readable and user-friendly.
-
-Once the first round of RL training converged (meaning the model got really good at reasoning), they used this improved model to generate new training data. But they were picky about it - they only kept the best responses, filtering out anything with mixed languages, overly long paragraphs, or messy code blocks. They combined this with some regular language tasks (like writing and answering questions) to create a more well-rounded training set.
-
-This iterative approach paid off. The final model, DeepSeek-R1, almost maintains all the impressive reasoning capabilities of R1-Zero but presents its solutions in a much more user-friendly way. It's like taking that brilliant but chaotic professor and teaching them how to explain things clearly to their students!
 
 
 # DeepSeek V3
