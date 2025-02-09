@@ -139,7 +139,7 @@ The team improved over this mixed-precision framework by introducing a fine-grai
 
 Among of the other tricks to introduce is the use of smart accumulation strategy where intermediate computations are promoted to higher precision at regular intervals. This ensures that despite using FP8 for most operations, the critical accumulation of gradients remains accurate.
 
-### Post-Training Enhancements
+## Post-Training Enhancements
 
 DeepSeek-V3 undergoes an extensive post-training phase. Reading this section and the R1 paper, It seems that (my personal opinion) this section of the V3 paper is introduced almost twice with many overlaps in the R1 paper.My feeling is that the wole part of reinforcement learning got rewritten with further depth and evaluatin in R1 paper. R1 paper is just an enrichment to this section of the V3 paper. Here is an overview to the steps of V3 post training.
 
