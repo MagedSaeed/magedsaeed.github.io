@@ -8,7 +8,7 @@ toc: true
 comments: true
 ---
 
-# Introduction
+## Introduction
 
 In January 2025, DeepSeek, a Chinese startup, unveiled its revolutionary AI model, transforming the artificial intelligence landscape with its exceptional performance-to-cost ratio compared to US and other West AI models. Alongside their model release, they launched a mobile app enabling real-time AI interactions similar to ChatGPT and Claude. The app cultivated over 10 million downloads on the Google Play Store within its first few weeks of release. Its rocketing growth reminds of the first days of ChatGPT release.
 
@@ -22,11 +22,11 @@ In this article, I will explain and overview how this model was trained with som
 
 This article begins with a preamble introducing key terminology to establish common ground. It then discusses DeepSeek-R1, followed by DeepSeek-V3.
 
-# Preamble and Terminologies
+## Preamble and Terminologies
 
 Before diving deeper, it's useful to establish a common ground so that both of us (me and you) can follow the technical discussion with a clear alignment to the context. This preamble will introduce two main topics that are relative to our discussion: The typical LLM development pipeline, and MoE architecture.
 
-## An LLM Development Pipeline
+### An LLM Development Pipeline
 
 The development of a production-grade LLM typically involves the following steps:
 
@@ -42,7 +42,7 @@ The development of a production-grade LLM typically involves the following steps
 
 *Figure 1: LLM Development Pipeline*
 
-## MoE architecture
+### MoE architecture
 
 DeepSeek V3 employs a Mixture of Experts (MoE) architecture. This design incorporates multiple specialized subnetworks (experts) trained together during training, with only few of them are activated during inference. Each expert develops proficiency in processing different types of inputs or tasks. During user interaction, the architecture's gating mechanism routes to the most appropriate expert(s) based on the input.
 
@@ -56,13 +56,13 @@ The MoE concept dates back to 1991 (Introduced in this paper: [Adaptive Mixture 
 
 The MoE architecture offers distinct advantages. Its primary benefit lies in its cost-effective inference while enabling comprehensive sparce learning during training. DeepSeek's architecture contains 671B total parameters, but only 37B are activated during inference. However, this efficiency comes with a trade-off: the entire model (all 671B parameters) should be loaded in GPU VRAM during inference. Furthermore, training this architecture is associated with challenges. For instance, consider the following question: how to effeciently load-balance the experts load during training to prevent signle or few experts overfitting?
 
-# DeepSeek R1
+## DeepSeek R1
 
 DeepSeek-R1 marks a landmark in AI development timeline. It is the first model that shows LLMs can self-learn reasoning via reinforcement learning in a large-scale setting. This has been prominently proven with DeepSeek-R1-Zero model where it showed that pure reinforcement learning could yield impressive result eliminating the need for SFT. This comes with the cost that its capabilities outside reasoning domains are hindered.
 
 This section starts by first introducing R1-Zero. Building on that, it discusses the development pipeline of R1. Finally, it concludes by presenting the interesting conclusions they presented for R1 distillation to smaller models.
 
-## DeepSeek-R1-Zero
+### DeepSeek-R1-Zero
 
 DeepSeek R1-Zero is a fascinating model given its training recipe. The motivation for training this model was to address the following question: Can we develop reasoning capabilities from pure RL only, without any SFT?
 
@@ -93,7 +93,7 @@ What's particularly interesting is how the model naturally learned to use longer
 
 R1-Zero, with its surprising performance on reasoning tasks, still suffers from issues of bad formatting and language mixing. Its performance on other downstream NLP tasks is also hindered due to the lack of SFT. Consequently, DeepSeek performed further refinements to produce a user-friendly model that is suitable for public use. However, R1-Zero served its purpose proving that pure reinforcement learning can teach the model to reason, and learn by its own.
 
-## R1 development pipeline
+### R1 development pipeline
 
 DeepSeek R1 is an improved version of R1-Zero trying to make it suitable for public and general use with polished, user-friendly outputs. To achieve this purpose, they performed some refinements combining the bests from both lands: SFT fine-tuning and RL. DeepSeek R1 development can be very briefly illustrated in the following sequence of steps:
 
@@ -113,7 +113,7 @@ After this initial training, they performed reinforcement learning on the DeepSe
 Finally, another round of RL is applied on the DeepSeek-V3-Rl-SFT checkpoing. This last fine-tuning step yields DeepSeek-R1. This iterative approach paid off. The final model, DeepSeek-R1, almost maintains all the impressive reasoning capabilities of R1-Zero but presents its solutions in a much more user-friendly way.
 
 
-## R1 distillation to small models
+### R1 distillation to small models
 
 After developing R1, they explored further practical angles to leverage such advances to small, more economical models. Basically, they tried to approach the following two questions:
 
@@ -127,7 +127,7 @@ The results were surprising. Their 7B model (DeepSeek-R1-Distill-Qwen-7B) outper
 Another key finding they report from these experiments: distilling knowledge from R1 worked better than trying to train smaller models directly with reinforcement learning. When they applied R1-Zero's RL approach to a 32B model, it only matched QwQ-32B-Preview's performance. But the distilled version significantly outperformed both, suggesting that transferring knowledge from larger models is more effective than training smaller ones from scratch.
 
 
-## Final thoughts
+### Final thoughts
 
 To give a concise summary, DeepSeek introduces the following **Ahaa moments in the LLMs research community:**
 
@@ -136,7 +136,7 @@ To give a concise summary, DeepSeek introduces the following **Ahaa moments in t
 - They showed that LLMs can be good SFT data generators.
 - They showed that distilling strong reasoning LLM to smaller models is more promising than training the small model with reinforcement learning.
 
-# DeepSeek V3
+## DeepSeek V3
 
 The introduction of DeepSeek-R1 would not be possible without the introduction of DeepSeek-V3. This model is the underlaying engine that drives the whole innovation of R1 and R1-zero. As introduced earlier, DeepSeek-V3 is a Mixture-of-Experts (MoE) language model, featuring 671B total parameters while activating only 37B parameters for each token during inference time. The developers incorporate multiple architectural innovations to achieve both efficiency, impressive, and strong performance at this large scale.
 
@@ -144,7 +144,7 @@ The architecture consists of 61 transformer layers with a hidden dimension of 71
 
 This section indents to provide a brief introduction to the model, they key innovations made while training it, which made it different than other typical LLMs.  Below is a list of innovations and tricks they employ to achieve such performance.
 
-## Multi-head Latent Attention (MLA)
+### Multi-head Latent Attention (MLA)
 
 DeepSeek-V3 utilizes Multi-head Latent Attention (MLA), a technique carried over from DeepSeek-V2 for efficient inference.
 
@@ -152,19 +152,19 @@ For a glance, the attention mechanism is a mathematical operation that calculate
 
 What MLA presenting (very briefly) is that they transform the keys and values into a lower dimension by down-projecting it with a lower-ranking matrix. This  transformation is cached during inference. During training where they want to attain the dimensionality of these two matrixes, they upper-project them with a higher-ranking matrix. This trick allows for faster inference while maintaining intact performance during training.
 
-## Auxiliary Loss Free Load Balancing
+### Auxiliary Loss Free Load Balancing
 
 DeepSeek implemented a MoE architecture. Following the hypothesis that parts of human brains are always active for all kinds of responses, they made a set of experts always active during inference. However, this introduces challenges on which expert got selected by the gating mechanism and thus has dominance during training and inference. This leads to inefficient training and waster compute during inference. For that sake, a loss-based load-balancing mechanism was introduced. Although it is effective, it confuses the training objective with its added gradients as the model will learn two objectives now. How to best select the best token and how to best balance its experts impairing the model performance as an additional regularization term. The innovation introduced by DeepSeek here is that they introduced a loss-free load balancing mechanism for the experts. This method does not rely on an auxiliary loss (as introduced in previous research works).
 
-## Multi-token Prediction
+### Multi-token Prediction
 
 Another key innovation in DeepSeek-V3 is its multi-token prediction capability. This trick was inspired by a previous research. However, they showed that this trick can also be scaled to this large number of parameter settings. The idea is simply rather than just predicting the next token, the model can predict multiple future tokens simultaneously through a causal chain of predictions. The future tokens after the next token are predicted with a shallower network compared to the main LLM. This is only activated during training. However, it is disabled during inference.
 
-## Infrastructure and Training
+### Infrastructure and Training
 
 Training large models like DeepSeek-V3 requires special attention to the training infrastructure. The model was trained on a cluster of 2048 NVIDIA H800 GPUs. The training framework, called HAI-LLM, is a lightweight framework built by DeepSeek engineers from scratch. The framework implements what they call DualPipe algorithm, allowing efficient pipeline parallelism by overlapping computation and communication. Reflecting my understanding here in this part, I can understand that experts can be trained on parallel. While they mentioned in their paper (section 3.2) that they even achieved such computation overlap during the forward and backward processes, it is not really clear, to me at least, how this overlap is happening as, in order to do the backward gradient update, the forward pass needs to be completed first.
 
-### FP8 Training
+#### FP8 Training
 
 One of the major advancements in DeepSeek-V3 is its pioneering use of 8-bit floating point (FP8) precision for training. Why this is important? Usually, training large language models requires high numerical precision (like FP32 or FP16) to maintain training stability. However, this comes with high memory and computational costs. DeepSeek showed that it is possible to train such large models with FP8 precision without compromising the training stability. They follow and improve on previous research (FP8-LM: https://arxiv.org/abs/2310.18313) introducing this idea at scale. It is also a good opportunaty to recall the BitNet paper (https://arxiv.org/abs/2310.11453) here as well.
 
@@ -174,14 +174,14 @@ The team improved over this mixed-precision framework by introducing a fine-grai
 
 Among of the other tricks to introduce is the use of a smart accumulation strategy where intermediate computations are promoted to higher precision at regular intervals. This ensures that despite using FP8 for most operations, the critical accumulation of gradients remains accurate.
 
-# Conclusion
+## Conclusion
 
 DeepSeek's R1 model represents a significant breakthrough in AI progress, demonstrating that pure reinforcement learning can effectively teach language models to reason without supervised fine-tuning. This was achieved through their innovative R1-Zero model, which later evolved into the more user-friendly R1 version. The success of their approach was further validated when they found that distilling knowledge from R1 to smaller models was more effective than training smaller models directly with reinforcement learning. Built on their V3 architecture, which employs novel techniques like Multi-head Latent Attention and FP8 training, DeepSeek managed to create a cost-effective solution that rivals or surpasses leading Western models. I really hope this model presents a milestone towards furher democratization of LLMs to wider audience further unlocking its couplilnng with close-source enterprises.
 
 
 
 
-# Useful Links and resources:
+## Useful Links and resources:
 
 Te following resources, beside the DeepSeek papers, helped me a lot while writing this article. Hope you will enjoy reading/listening to them.
 
