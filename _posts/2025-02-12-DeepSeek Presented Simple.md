@@ -6,11 +6,14 @@ tags: []     # TAG names should always be lowercase
 description: A mid in-depth technical review on how DeepSeek was developed
 toc: true
 comments: true
+image: 
+    path: assets/2025-02-12-DeepSeek Presented Simple/deepseek-landing-page.png
+    alt: DeepSeek landing page.
 ---
 
 ## Introduction
 
-In January 2025, DeepSeek, a Chinese startup, unveiled its revolutionary AI model, transforming the artificial intelligence landscape with its exceptional performance-to-cost ratio compared to US and other West AI models. Alongside their model release, they launched a mobile app enabling real-time AI interactions similar to ChatGPT and Claude. The app cultivated over 10 million downloads on the Google Play Store within its first few weeks of release. Its rocketing growth reminds of the first days of ChatGPT release.
+In January 2025, DeepSeek (deepseek.com), a Chinese startup, unveiled its revolutionary AI model, transforming the artificial intelligence landscape with its exceptional performance-to-cost ratio compared to US and other West AI models. Alongside their model release, they launched a mobile app enabling real-time AI interactions similar to ChatGPT and Claude. The app cultivated over 10 million downloads on the Google Play Store within its first few weeks of release. Its rocketing growth reminds of the first days of ChatGPT release.
 
 What drove DeepSeek's R1 to such popularity? Well, their open-source (Well, not technically fully open-source) model delivers impressive performance comparable to leading Western open-source AI counterparts like Llama and Mixtral. They also offers a web and API interface access with huge cost cutoffs compared to the closed-source market. Furthermore, their performance rivals the cutting-edge models: OpenAI's ChatGPT o1 (released very recently) and Anthropic's Claude 3.5 Sonnet, even surpassing them on some benchmarks. They achieved this performance while reducing costs by more than 95% (1M output token: 60$ OpenAI o1 - 2.19$ DeepSeek). This causes significant market disruption leading to an approximate collapse of $1 trillion in market value. Nvidia, the GPU industry leader, experienced an unprecedented $600 billion loss in market capital, marking the largest single-company loss in U.S. stock market history!
 
