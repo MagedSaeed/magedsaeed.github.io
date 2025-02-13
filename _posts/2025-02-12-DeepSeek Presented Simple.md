@@ -3,7 +3,7 @@ title: DeepSeek Presented Simple
 date: 2025-02-12
 categories: [LLMs]
 tags: []     # TAG names should always be lowercase
-description: Short summary of the post.
+description: A mid in-depth technical review on how DeepSeek was developed
 toc: true
 comments: true
 ---
