@@ -174,6 +174,12 @@ The team improved over this mixed-precision framework by introducing a fine-grai
 
 Among of the other tricks to introduce is the use of a smart accumulation strategy where intermediate computations are promoted to higher precision at regular intervals. This ensures that despite using FP8 for most operations, the critical accumulation of gradients remains accurate.
 
+# Conclusion
+
+DeepSeek's R1 model represents a significant breakthrough in AI progress, demonstrating that pure reinforcement learning can effectively teach language models to reason without supervised fine-tuning. This was achieved through their innovative R1-Zero model, which later evolved into the more user-friendly R1 version. The success of their approach was further validated when they found that distilling knowledge from R1 to smaller models was more effective than training smaller models directly with reinforcement learning. Built on their V3 architecture, which employs novel techniques like Multi-head Latent Attention and FP8 training, DeepSeek managed to create a cost-effective solution that rivals or surpasses leading Western models. I really hope this model presents a milestone towards furher democratization of LLMs to wider audience further unlocking its couplilnng with close-source enterprises.
+
+
+
 
 # Useful Links and resources:
 
