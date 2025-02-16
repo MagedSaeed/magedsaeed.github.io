@@ -187,7 +187,7 @@ Among of the other tricks to introduce is the use of a smart accumulation strate
 
 DeepSeek's R1 model represents a significant breakthrough in AI progress, demonstrating that pure reinforcement learning can effectively teach language models to reason without supervised fine-tuning. This was achieved through their innovative R1-Zero model, which later evolved into the more user-friendly R1 version. The success of their approach was further validated when they found that distilling knowledge from R1 to smaller models was more effective than training smaller models directly with reinforcement learning. Built on their V3 architecture, which employs novel techniques like Multi-head Latent Attention and FP8 training, DeepSeek managed to create a cost-effective solution that rivals or surpasses leading Western models. I really hope this model presents a milestone towards furher democratization of LLMs to wider audience further unlocking its couplilnng with close-source enterprises.
 
-
+Before ending this post, I would like to give a special Thanks for [Ahmed Ashraf](https://www.linkedin.com/in/ahmd-achraf/) for providing me with better post drawings. I really appreciate the effort.
 
 
 ## Useful Links and resources:
