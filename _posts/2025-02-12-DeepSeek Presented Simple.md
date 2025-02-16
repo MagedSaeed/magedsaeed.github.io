@@ -41,7 +41,7 @@ The development of a production-grade LLM typically involves the following steps
 
 - **Alignment:** While the model seems to be ready for the public use from the previous step, this final step further ensures that the model aligns its output with human preferences by avoiding harmful, offensive, or disrespectful content. This typically involves a process of tuning called Reinforcement Learning from Human Feedback (RLHF). The model, in this step, is tuned to follow human preferences. The resulting model after this step is a production-ready LLM, often called a Chat model (like ChatGPT). In some cases, this step is combined with the previous fine-tuning step in the technical reports.
 
-![Figure 1: LLM Development Pipeline](assets/2025-02-12-DeepSeek Presented Simple/llm-development-pipeline.png)
+![Figure 1: LLM Development Pipeline](assets/2025-02-12-DeepSeek Presented Simple/AhmedAshraf/chat_llm_white.png)
 
 *Figure 1: LLM Development Pipeline*
 
@@ -53,7 +53,7 @@ A common misconception about MoE is that experts specialize in specific domains 
 
 The MoE concept dates back to 1991 (Introduced in this paper: [Adaptive Mixture of Local Experts](https://www.cs.toronto.edu/~fritz/absps/jjnh91.pdf)) but has gained renewed attention through its successful application in large-scale LLMs, particularly with the introduction of Mixtral LLMs. In a transformer-based architecture, experts usually replace the feedforward network positioned after the attention and normalization layers.
 
-![Figure 2: Mixture of Experts Architecture](assets/2025-02-12-DeepSeek Presented Simple/MoE.png)
+![Figure 2: Mixture of Experts Architecture](assets/2025-02-12-DeepSeek Presented Simple/AhmedAshraf/MoE_white_v2.png)
 
 *Figure 2: Mixture of Experts in a Transformers architecture*
 
@@ -106,7 +106,7 @@ DeepSeek R1 is an improved version of R1-Zero trying to make it suitable for pub
 4. DeepSeek-V3-RL fine-tuning on post-RL-SFT data -> DeepSeek-V3-RL-SFT
 5. Finally DeepSeek-V3-RL-SFT undergoes another round of RL training where this step produces **DeepSeek-R1**.
 
-![Figure 6: DeepSeek-R1 development pipeline](assets/2025-02-12-DeepSeek Presented Simple/DeepSeek-R1-pipeline.png)
+![Figure 6: DeepSeek-R1 development pipeline](assets/2025-02-12-DeepSeek Presented Simple/AhmedAshraf/DeepSeek-R1-pipeline-white.png)
 *Figure 6: DeepSeek-R1 development pipeline*
 
 Discussing this pipeline in further details, they first start by fine-tuning DeepSeek-V3-base with data they called cold start data. This data consists of thousands of high-quality SFT datasets. The reasoning SFT data was collected via few-shot prompting with long CoT on DeepSeek-R1-Zero. The generated samples undergo verification steps with rejection sampling. They also extend this verification to human annotatation to maintain a high-quality constraints. This seems to play a major role in giving the model an overview of SFT settings, beside, of course, its important role in maintaining stable fine-tuning for the upcoming phases, alternating between SFT and RL reasoning setups. 
@@ -165,7 +165,13 @@ Another key innovation in DeepSeek-V3 is its multi-token prediction capability. 
 
 ### Infrastructure and Training
 
-Training large models like DeepSeek-V3 requires special attention to the training infrastructure. The model was trained on a cluster of 2048 NVIDIA H800 GPUs. The training framework, called HAI-LLM, is a lightweight framework built by DeepSeek engineers from scratch. The framework implements what they call DualPipe algorithm, allowing efficient pipeline parallelism by overlapping computation and communication. Reflecting my understanding here in this part, I can understand that experts can be trained on parallel. While they mentioned in their paper (section 3.2) that they even achieved such computation overlap during the forward and backward processes, it is not really clear, to me at least, how this overlap is happening as, in order to do the backward gradient update, the forward pass needs to be completed first.
+Training large models like DeepSeek-V3 requires special attention to the training infrastructure. The model was trained on a cluster of 2048 NVIDIA H800 GPUs. The training framework, called HAI-LLM, is a lightweight framework built by DeepSeek engineers from scratch. The framework implements what they call DualPipe algorithm, allowing efficient pipeline parallelism by overlapping computation and communication. To shade some lights why this algorithm is useful, let us have a bit of a background on LLMs training stages.
+
+As any neural network, the LLM needs first to perform the forward pass, calculate the loss, and gradients, then, perform the backward pass where it updates the weights and biases using an optimizer like Adam. This pipeline is smooth when the model is small and can fit on a single GPU. However, when training a large model that could span over multiple GPUs on multiple nodes (maybe you need to take a look on [model parallelism](https://huggingface.co/docs/transformers/v4.13.0/en/parallelism)?) this pipeline becomes ineffecient as some nodes become idle, waiting for forward and backward calculations. Previous training schedules already introduced where they were able to redunce the number of bubbles in the cluster (bubbles are the idle nodes), see: https://arxiv.org/pdf/1806.03377 and: https://arxiv.org/pdf/2401.10241. DualPipe builds on this work where they introduce two more points:
+
+- They first split the forward and backward into further fine-graned stages to improve their computaiton parallelsim.
+- They followed a bidirectional approach. They duplicates the parameters the device holds and run to parallel micro-batch on each copy. While this will introduce another computation and communication overhead, it further improves pipeline parallelism. I strongly recommend reading this elegant post (https://dataturbo.medium.com/deepseek-technical-analysis-4-dualpipe-672d0ef63ee6) before reading DeepSeek paper on this topic.
+
 
 #### FP8 Training
 
@@ -193,6 +199,7 @@ Te following resources, beside the DeepSeek papers, helped me a lot while writin
 - [The Illustrated Deep-Seek-R1](https://newsletter.languagemodels.co/p/the-illustrated-deepseek-r1)
 - [What is Mixture of Experts?](https://www.youtube.com/watch?v=sYDlVVyJYn4&t=328s) (by IBM Technology channel)
 - [Mixture of Experts Explained](https://huggingface.co/blog/moe) (by huggingface team)
+- [Model Parallelism](https://huggingface.co/docs/transformers/v4.13.0/en/parallelism) (again, by huggingface team)
 - [A Visual Guide to Mixture of Experts (MoE) in LLMs](https://www.youtube.com/watch?v=sOPDGQjFcuM&t=532s)
 - [The History of Mixture of Experts](https://www.linkedin.com/pulse/history-mixture-experts-upp-technology-ok9re/)
 - [DeepSeek-R1: RL for LLMs Rethought](https://thegrigorian.medium.com/deepseek-r1-rl-for-llms-rethought-e148445d4381)
