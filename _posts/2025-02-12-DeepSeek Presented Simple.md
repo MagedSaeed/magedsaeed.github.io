@@ -203,3 +203,4 @@ Te following resources, beside the DeepSeek papers, helped me a lot while writin
 - [A Visual Guide to Mixture of Experts (MoE) in LLMs](https://www.youtube.com/watch?v=sOPDGQjFcuM&t=532s)
 - [The History of Mixture of Experts](https://www.linkedin.com/pulse/history-mixture-experts-upp-technology-ok9re/)
 - [DeepSeek-R1: RL for LLMs Rethought](https://thegrigorian.medium.com/deepseek-r1-rl-for-llms-rethought-e148445d4381)
+- [Debunking DeepSeek Delusions](https://www.tanishq.ai/blog/posts/deepseek-delusions.html)
