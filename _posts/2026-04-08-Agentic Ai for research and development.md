@@ -519,5 +519,3 @@ If you try any of this and find a better way, please share your experience. I wi
 - [python-dotenv](https://github.com/theskumar/python-dotenv)
 
 ---
-
-*This post is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) by the author.*
