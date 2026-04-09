@@ -10,20 +10,19 @@ comments: true
 
 ## Introduction
 
-Many of us are witnessing the rapid advances of LLMs development, and something has genuinely shifted in our daily workflows. It is not just that AI got smarter (though it did). It is not just that the tools got cheaper (though they did too). The real shift is that our interactions with LLMs are becoming agentic rather than chat-based. With proper agentic workflows, LLMs can now plan a sequence of actions, execute them, observe what happened, and revise. They can read files, run scripts on your behalf, search the web, and edit code, all without leaving the terminal, and without you micromanaging every step.
+Many of us are witnessing the rapid advances in LLM development, and something has genuinely shifted in our daily workflows. It is not just that AI got smarter (though it did). It is not just that the tools got cheaper (though they did too). The real shift is that our interactions with LLMs are becoming agentic rather than chat-based. With proper agentic workflows, LLMs can now plan a sequence of actions, execute them, observe what happened, and revise. They can read files, run scripts on your behalf, search the web, and edit code, all without leaving the terminal, and without you micromanaging every step.
 
-I have been using Claude Code as a primary tool of my research and development workflow for several months now, and I want to share what I learned, not as a marketing pitch, but as an honest, opinionated guide from someone who writes papers, runs experiments, manages datasets, writes code, and ships production-ready software. This article is for graduate students, researchers, and developers who are curious whether and how agentic AI can genuinely help, and who are looking for something more substantive than "here are five prompts to try."
+I have been using Claude Code as a primary tool of my research and development workflow for several months now, and I want to share what I learned. This article is for graduate students, researchers, and developers working in adjacent fields who are curious whether and how agentic AI can genuinely help.
 
-One disclaimer up front: most of this article covers *my* workflow. It has worked well for me, but I am sure there are sharper, smarter ways to do many of the things I describe here that you may practice or follow. If you have your own setup, I would love to hear about it. Treat this article as an invitation to compare notes and workflows, not a prescription.
+**One disclaimer up front:** most of this article covers *my* workflow. It has worked well for me, but I am sure there are sharper, smarter ways to do many of the things I do here that you may practice or follow. If you have your own setup, I would love to hear about it and also let others know about it. Consider this article an invitation to compare notes and workflows with a wider audience of similar interests.
 
 ### How to Read This Article
 
-This article is long on purpose. It is meant to be a reference you can come back to, not a single-sitting read. A few suggestions to make it lighter:
+This article is long on purpose. It is meant to be a reference someone can come back to, not a single-sitting read. A few suggestions to make it lighter:
 
 - **Skip what you already know.** If you are comfortable with Git, jump past Part 1. If you have used Claude Code for a while, skim Parts 3 and 4 and slow down on hooks, skills, and subagents.
-- **Read by part, not by line.** Each part is self-contained. The table of contents on the side is your friend.
-- **The code blocks are illustrative, not prescriptive.** Adapt them to your stack. The shape of the workflow matters more than the exact configuration.
-- **This is one workflow, not the workflow.** It is what works for me until now. I would genuinely love to hear how others are doing it differently, and share their workflows with this article.
+- **Read by part, not by line.** Each part is self-contained. The table of contents on the side should be very helpful.
+- **The code blocks are illustrative, not prescriptive.** Adapt them to your stack. The shape of the workflow matters more than the exact configuration. You may search the net or consult claude itself to craft these code blocks better for your workflow.
 
 ---
 
@@ -33,7 +32,7 @@ Before diving deeper, let us establish some common ground.
 
 ### What Makes AI "Agentic"?
 
-Imagine two kinds of colleagues. The first is brilliant but passive: you describe a problem, he thinks it over and gives you advice, and the ball is back in your court to implement. The second is equally brilliant but active: you describe a problem, he sits next to you, opens your files, runs a few commands, reads the output, adjusts his approach, and hands you something working. Both are valuable. But when you are deep in a deadline, the second one changes your day.
+Say that you have two kinds of colleagues. The first is brilliant but passive: you describe a problem, he thinks it over and gives you advice, and the ball is back in your court to implement. The second is equally brilliant but active: you describe a problem, he sits next to you, opens your files, runs a few commands, reads the output, adjusts his approach, and hands you something working. Both are valuable. But when you are deep in a deadline, the second one changes your day.
 
 A regular chat interface (like Claude.ai or ChatGPT) is the first colleague. You send a message, the model responds, and that is it. An *agentic* AI system is the second: it can use tools (execute bash commands, read and write files, call APIs, search the web), take multi-step actions, and self-correct based on what it observes. The core loop looks like this:
 
@@ -41,15 +40,15 @@ A regular chat interface (like Claude.ai or ChatGPT) is the first colleague. You
 
 The model proposes what it will do, executes one step, reads the result (terminal output, file contents, error message), and adjusts. This is fundamentally different from a simple back-and-forth chat.
 
-The distinction matters in practice. When you ask a chat interface "how do I compute Cohen's d across model pairs?", it tells you. When you ask an agentic system, it opens your evaluation script, writes the function, runs it on your data, reads the error, fixes it, and shows you the result. The knowledge is the same. The *leverage* is not.
+The distinction matters in practice. When you ask a chat interface "how do I compute Cohen's d across model pairs or runs?", it tells you. When you ask an agentic system, it opens your evaluation script, writes the function, runs it on your data, reads the error, fixes it, and shows you the result. The knowledge is the same. The *leverage* is not.
 
-Claude Code and tools like it (Gemini CLI from Google, opencode from the open-source community, and Codex from OpenAI) are agentic AI systems designed to work inside your development environment. They share the same underlying models as their chat counterparts, but they operate with access to your file system, your terminal, and your tools.
+Claude Code and tools like it (Gemini CLI from Google, opencode from the open-source community, and Codex from OpenAI) are agentic AI systems built to work inside your development environment. They share the same underlying models as their chat counterparts, but they operate with access to your file system, your terminal, and your tools.
 
 ---
 
 ## Part 1: Git as a Useful Practice
 
-Before we dive into the agentic world, I want to make an argument for something that might sound boring: proper Git practices are one of the most useful tools you can bring into an agentic workflow. This is true whether or not you use Agentic AI, but it becomes highly useful the moment an agent starts editing your files.
+Before we dive into the agentic world, I want to make an argument for something that might sound boring: proper Git practices are one of the most useful habits you can bring into an agentic workflow. This is true whether or not you use Agentic AI, but it becomes highly useful the moment an agent starts editing your files.
 
 When an agent can edit your files, rename functions, refactor modules, and create new scripts across dozens of files in a single session, you need a clean way to review, approve, and roll back those changes. Without Git, you are flying blind, trying to remember what changed and what did not. With Git, every agent action becomes a *diff* you can read, approve, reject, or revise. This shifts the question from "did the AI write good code?", which is hard to answer in the abstract, to "is this diff correct and do I understand it?", which is much easier to follow. In that sense, an interaction with an agentic system is best thought of as a small pull request with a well-defined scope: the agent proposes; you review; you merge, refine, or discard.
 
@@ -57,10 +56,10 @@ Git also helps with something subtler: **cognitive load**. Agentic sessions move
 
 ### A Practical Git Mindset
 
-These tips are useful with or without an agent. They just become non-negotiable when an agent is involved.
+These tips are useful with or without an agentic workflow. They just become non-negotiable when an agent is involved.
 
-- **Commit after each meaningful action or completed feature.** Commit small, but commit when something is actually done, not in the middle of a half-baked refactor and not after a long session with a dozen unrelated changes mixed together.
-- **Read diffs before committing.** Use the VSCode diff view, or `git diff` if you prefer the terminal. You do not need to understand every line, but you should have a working understanding of what is being committed. If you cannot summarize the diff in one sentence, you may lose control over your project later.
+- **Commit after each meaningful action or completed feature.** Commit small, but commit when something is actually done, not in the middle of a half-baked refactor and not after a long session(s) with a dozen unrelated changes mixed together.
+- **Read diffs before committing.** Use the VSCode diff view, or `git diff` if you prefer the terminal. You do not need to understand every line, but you should have an overview of what is being committed. If you cannot summarize the diff in one sentence (i.e. the commit message), you will most probably lose control over your project later.
 - **Write real commit messages.** Underrated but very useful, even if the only person reading them is future-you trying to understand what happened last week.
 - **Start agent sessions on a clean branch.** Optional but recommended: better not to run an agent on `main` directly. A branch named `experiment/arabic-ner-refactor` costs nothing and gives you a full rollback if the session goes sideways.
 
@@ -68,7 +67,7 @@ These tips are useful with or without an agent. They just become non-negotiable 
 
 ## Part 2: AI Assistance for Research and Development Tasks
 
-Before discussing agentic systems, it is worth understanding what can be accomplished with an AI assistant through a good chat interface alone. This layer is especially useful for research, and most researchers will get a lot of value out of it before they even need an agentic tool.
+Before discussing agentic systems, it is worth understanding what can be accomplished with an AI assistant through a good chat interface alone. This layer is especially useful for research, and most will get a lot of value out of it before they even need an agentic tool.
 
 The tasks that benefit most from AI assistance fall into a few natural categories.
 
@@ -83,26 +82,26 @@ Concrete things that work well here:
 - Drafting reviewer responses.
 - Drafting abstracts and conclusions.
 
-One calibration worth making explicit: the model tends toward verbosity. Left unconstrained, it produces fluent text that is slightly longer than your target. Build constraints into your prompts ("no more than 150 words", "single paragraph of around N lines", "short and elegant") and you will get tighter, better-shaped outputs.
+One calibration worth making explicit here: the model tends toward verbosity. Left unconstrained, it produces fluent text that is slightly longer than your target. Build constraints into your prompts ("no more than 150 words", "single paragraph of around N lines", "short, elegant, and academically sounding") and you will get tighter, better-shaped outputs.
 
 ### Literature Review and Research Exploration
 
 The genuinely useful version of this is **deep research**: Gemini's deep research feature or Claude's research mode (where available) autonomously searches academic databases (arXiv, ScienceDirect, Semantic Scholar, ACL Anthology, etc.), reads papers, and synthesizes across sources over several minutes. For initial landscape exploration in a new subfield, this is remarkably useful. For anything that goes into a paper, it requires careful verification. Hallucinated citations (though they tend to be less frequent in deep-research mode than in plain chat against the model's training data) are a real risk with all current models, and niche subfields are particularly prone to this.
 
-A concrete example. I was interested in a small research question: what happens when you prompt an LLM to deliberately give the *wrong* answer choice to multiple-choice questions from MMLU-style benchmarks instead of the correct choice? Are there existing studies of that exact behavior? I asked Claude in deep research mode:
+A concrete example. I was interested in a small research question: what happens when you prompt an LLM to deliberately give a *wrong* answer choice to multiple-choice questions from MMLU-style benchmarks instead of the correct choice? Are there existing studies of that exact behavior? Actually, this question is interesting because it challenges the model's alignment and investigates its distribution (which wrong answer is it going to pick?). I asked Claude in deep research mode:
 
 > *I want you to do deep research on academic resources (arXiv, ScienceDirect, ICLR, ICML, ACL, etc.) and find any related research that studies multiple-choice benchmarks and how LLMs select answers. I am planning a study where I prompt the LLM to respond with a wrong answer instead of the right answer for an MCQ question (from popular MMLU-style benchmarks), and I am interested in any related work. Can you do that for me?*
 
-After the first pass, I followed up with sharper questions:
+After the first pass, I followed up with some other questions:
 > *did you find anyone who exactly prompts the LLM to give wrong answers and then studies the behavior?*
-and:
+and (for more brainstorming ideas):
 > *you give a nice motivation for my work; what else could be done to make it better in terms of analysis and experiments?*
 
-Within a few minutes I had a structured map of the related literature that gave me a clear view of the gap to position my work against, plus a list of suggested experiments and analyses. The end result of that conversation is captured in [this artifact](https://claude.ai/public/artifacts/0ec172ee-d69d-42dd-8e5d-0cdb86e4679d). It is not a substitute for reading the papers, but it shrank what would have been a few hours or even days of background search into a single afternoon.
+Within a few minutes I had a structured map of the related literature that gave a clear view of the gap to position my work against, plus a list of suggested experiments and analyses. The end result of that conversation is in [this artifact](https://claude.ai/public/artifacts/0ec172ee-d69d-42dd-8e5d-0cdb86e4679d). It is not a substitute for reading the papers, but it shrank what would have been a few hours or even days of background search into a single afternoon.
 
 ### Brainstorming Research Methodology
 
-A related use case is using the chat as a thinking and brainstorming partner for research design. I have had productive sessions where I describe a half-formed idea, the model pushes back, asks clarifying questions, and proposes alternative framings. The chat becomes a back-and-forth about how to structure an evaluation, what to control for, and which baselines actually answer the question you care about. The model will not design the experiment for you, but it is a great partner for the parts of methodology you would otherwise work out alone on a whiteboard: which LLM(s) to choose, which dataset(s) to evaluate on, how to lay out the pipeline, and so on.
+A related use case is using the chat as a thinking and brainstorming partner for research design. I have had productive sessions where I describe a half-formed idea, the model pushes back, asks clarifying questions, and proposes alternative framings. The chat becomes a back-and-forth about how to structure an evaluation, what to control for, and which baselines actually answer the question you care about. The model will not fully design the experiment for you, but it is a great partner for the parts of methodology you would otherwise work out alone on a whiteboard: which LLM(s) to choose, which dataset(s) to evaluate on, how to lay out the experimental pipeline, and so on. Once you have this as a final recipe, you can pass it to Claude Code for the implementation.
 
 ### Development Tasks
 
@@ -111,15 +110,15 @@ For research and development workflows, AI assistants handle a wide range of tas
 - **Code explanation.** Paste an unfamiliar codebase section and ask what it does and what the edge cases are. Particularly valuable when inheriting someone else's research/developed code.
 - **API exploration.** "What is the correct way to use `Trainer` from HuggingFace Transformers for multi-GPU evaluation?" Faster than reading docs, though you should still verify against them.
 - **Debugging hypotheses.** Describe a bug and the relevant code; ask for a ranked list of likely causes.
-- **Architecture and framework comparisons.** "I am building a retrieval pipeline over 2M Arabic documents. Compare LlamaIndex vs. Haystack vs. building it directly with FAISS plus a thin wrapper, given that I care most about reproducibility and want to swap embedding models cheaply." This is the kind of question where a chat interface shows value: it surfaces tradeoffs you might not have considered, asks about constraints, and forces you to articulate your priorities.
+- **Architecture and framework comparisons.** "I am building a retrieval pipeline over 2M documents. What are the available indexers there? Compare LlamaIndex vs. Haystack vs. building it directly with FAISS plus a thin wrapper vs. other alternatives (you may search the net), given that I care most about reproducibility and want to swap embedding models cheaply." This is the kind of question where a chat interface shows value: it surfaces tradeoffs you might not have considered, asks about constraints, and forces to articulate your priorities.
 - **Migration and refactoring plans of developed software.** "Here is a Flask monolith that handles auth, ingestion, and inference. I want to split it into two services. Walk me through the cleanest way to do that, what to extract first, and what to leave alone." The model is a good thinking partner for these structural decisions; it will push back, suggest alternatives, and flag tradeoffs.
 - **Choosing the right tool for a one-off task.** "I need to deduplicate a 50GB JSONL of web text by near-duplicate detection. What is the lightest-weight approach that does not need a Spark cluster?" Five minutes of chat saves an afternoon of evaluating libraries.
 
-The pattern across all of these: the assistant is most useful when you bring it a real, specific situation with constraints, not a generic question.
+The pattern across all of these: the assistant is most useful when you bring it a specific situation with constraints, instead of a generic question.
 
 ### A Tooling Tip Worth Mentioning: Diagrams
 
-Slightly off the main flow but too useful to leave out: Claude is genuinely good at generating **draw.io / diagrams.net** XML. Given a prose description of a figure (an architecture diagram, a pipeline overview, an experimental setup), it can produce mxGraph XML with consistent node sizes, sensible alignment, readable labels, and a coherent color palette. I usually instruct it to aim for "elegant, academic, simple to follow." The result is rarely perfect on the first pass, but it is a far faster starting point than building from scratch in the GUI, and the output drops straight into draw.io for fine-tuning. I almost always do this in the chat interface, since the iteration loop ("look at the rendered diagram, ask for tweaks, paste the new XML back into draw.io") does not really need the agent's tools.
+Slightly off the main flow here but too useful to leave out: Chat interfaces are genuinely good at generating **draw.io / diagrams.net** XML. Given a prose description of a figure (an architecture diagram, a pipeline overview, an experimental setup) or even a paper writeup where the model suggests an overview figure, it can produce mxGraph XML (draw.io xml DSL) with consistent node sizes, sensible alignment, readable labels, and a coherent color palette. I usually instruct it to aim for "elegant, academic, simple to follow with nice aesthetics." The result is rarely perfect on the first pass, but it is a far faster starting point than building from scratch in the GUI, and the output drops straight into draw.io for fine-tuning. I almost always do this in the chat interface (not claude code in terminal), since the iteration loop ("look at the rendered diagram, ask for tweaks, paste the new XML back into draw.io") does not really need the agent's tools.
 
 ---
 
@@ -145,7 +144,7 @@ On first run, you authenticate with your Anthropic account (either via your subs
 
 A few things worth knowing immediately: the agent can see your entire current directory tree, so be intentional about where you launch it. By default, it asks for your approval before executing commands. And your session context is local; it is not stored beyond the active window unless you explicitly resume.
 
-For those who prefer working programmatically, Claude Code also exposes **Python and TypeScript SDKs** that let you integrate the same agentic capabilities directly into your own scripts and pipelines, or even invoke the agent from your own code via command-line calls. If you are building a research automation system, for instance an evaluation pipeline that autonomously runs experiments and summarizes results, the SDK is the right interface rather than the interactive terminal.
+For those who prefer working programmatically, Claude Code also exposes **Python and TypeScript SDKs** that let you integrate the same agentic capabilities directly into your own scripts and pipelines, or even invoke the agent from your own code via command-line calls. If you are building a research automation system, for instance an evaluation pipeline that autonomously runs experiments and summarizes results, the SDK is a good option to explore rather than the interactive terminal.
 
 Both Claude.ai and Claude Code support the concept of *projects*, named workspaces that group related conversations or sessions. In Claude.ai, projects let you keep separate chats for different topics, each with its own context and uploaded files. In Claude Code, projects also come with their own `CLAUDE.md`, hooks configuration, and session history.
 
@@ -177,6 +176,7 @@ using the STAR dataset. Evaluation framework is in `src/eval/`.
 - Completed: SA, NER, MT task loaders.
 - In progress: QA loader (`src/tasks/qa.py`).
 - Blockers: JAIS model access pending HPC queue.
+...
 ```
 
 Note the `.env` entry. This is a practical tip that applies to almost every project: a `.env` file at the project root, loaded via `python-dotenv` in Python (or `dotenv` in Node), centralizes all environment-specific values, including API keys, dataset paths, and server addresses. The agent respects it, your scripts use it, and nothing sensitive ever gets hardcoded.
@@ -185,7 +185,7 @@ For a research group, a shared `CLAUDE.md` at the repo root encodes group conven
 
 ### Project Structure for Skills, Commands, and Hooks
 
-Before talking about what these are, it helps to know where they live. Everything in this section, `CLAUDE.md`, hooks, skills, commands, subagents, and MCPs, applies equally whether you use Claude Code in the terminal or through the VSCode extension. The same `.claude/` directory powers both.
+Before talking about what these are, it helps to know where they live. Everything in this section, `CLAUDE.md`, hooks, skills, commands, subagents, and MCPs, applies equally whether you use Claude Code in the terminal or through the VSCode extension (comes later). The same `.claude/` directory powers both.
 
 Claude Code follows a convention-based project structure under `.claude/` at your project root:
 
@@ -210,6 +210,30 @@ your-project/
 ```
 
 Subagents are not files in the same sense; they are spawned during a session, as we will see shortly.
+
+### Modes and Permissions
+
+Before getting into the more advanced machinery (hooks, skills, commands, MCPs), it helps to understand the operating modes Claude Code runs in. Choosing the right one for the task is a skill that develops quickly with practice, and the rest of this section assumes you know which mode you are in.
+
+#### Edit Mode (Default)
+
+The default: Claude proposes file edits and waits for your approval before applying them. You see the diff, approve or reject, and the change is made. Safest mode. Recommended for any session touching real experimental data or results.
+
+#### Plan Mode
+
+Claude proposes a plan, a structured sequence of steps, files to touch, and changes to make, without touching anything. You review, modify if needed, and then either authorize execution or switch modes.
+
+This is the right starting point for large refactoring tasks, new feature additions, or any session where you want to understand the scope before committing. For research code, which tends to be tangled and underdocumented, starting complex tasks in plan mode is a good habit.
+
+#### Skip Permissions
+
+With `--dangerously-skip-permissions`, Claude executes without pausing for approval at each step. Right for trusted, automated pipelines: a nightly evaluation run, a preprocessing job over a fixed dataset, where you want the agent to proceed without interruption.
+
+Use it carefully. The agent can overwrite results, delete intermediates, or make irreversible changes without stopping. Rule of thumb: skip permissions only when Git is clean, the sequence of steps has been tested at least once interactively, and you have a clear rollback plan.
+
+#### Dictation Mode
+
+Less known but genuinely useful: Claude Code now ships with a built-in **voice dictation** mode (`/voice`, available from v2.1.69 onward, [docs here](https://code.claude.com/docs/en/voice-dictation)). You hold a key and speak; the audio is streamed to Anthropic for transcription and dropped live into your prompt input, so you can mix voice and typing in the same message. The default push-to-talk key is Space, and you can rebind it to a modifier so dictation activates on the first keypress instead of after a hold. One thing to note: the speech-to-text service is only available when you authenticate with a Claude.ai account; it does not work with raw API keys. This works well during exploratory sessions when your hands are occupied: running an experiment, sketching on a whiteboard, thinking out loud. You narrate what you want, Claude executes. For brainstorming-driven sessions, the ability to think out loud and have something happen feels exciting.
 
 ### Hooks: Automating Around the Agent
 
@@ -332,7 +356,9 @@ When I share a prompt, analyze it for:
 Then propose an improved version. Show your reasoning.
 ```
 
-A relatively new development: you no longer have to write every skill from scratch. **Skill marketplaces** have appeared (Anthropic's own [plugins page](https://claude.com/plugins), community indexes like [tonsofskills.com](https://tonsofskills.com/), and large open collections like [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) or [jeremylongshore/claude-code-plugins-plus-skills](https://github.com/jeremylongshore/claude-code-plugins-plus-skills)) where third parties publish ready-made skills you can install in one line, e.g. `/plugin marketplace add alirezarezvani/claude-skills` followed by `/plugin install <name>`. Concrete examples I have seen in the wild: a Railway pack covering deployments and environment management; CI/CD builders that wire the agent into GitHub Actions or GitLab pipelines; Git automation, testing, and code-review skill bundles. Cloud providers and SaaS vendors are starting to ship official skills the same way they ship SDKs, which means a chunk of "teach the agent how this tool works" can now be borrowed instead of written.
+A relatively new development: you no longer have to write every skill from scratch. **Skill marketplaces** have appeared (Anthropic's own [plugins page](https://claude.com/plugins), community indexes like [tonsofskills.com](https://tonsofskills.com/), and large open collections like [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) or [jeremylongshore/claude-code-plugins-plus-skills](https://github.com/jeremylongshore/claude-code-plugins-plus-skills)) where third parties publish ready-made skills you can install in one line, e.g. `/plugin marketplace add alirezarezvani/claude-skills` followed by `/plugin install <name>`. Concrete examples include CI/CD vendor packs that wire the agent into GitHub Actions or GitLab pipelines, and Git automation, testing, and code-review skill bundles. Cloud providers and SaaS vendors are starting to ship official skills the same way they ship SDKs, which means a chunk of "teach the agent how this tool works" can now be borrowed instead of written.
+
+**Skills can take arguments too.** Just like commands (covered in the next section), a skill body can reference `$ARGUMENTS` to capture everything the user typed when invoking it, or use positional placeholders like `$0`, `$1`, `$2`. So a `fix-issue` skill containing `Fix GitHub issue $ARGUMENTS following our coding standards`, when invoked as `/fix-issue 123`, expands to "Fix GitHub issue 123 following our coding standards." This is what makes skills feel like small parameterized functions rather than static instruction sheets.
 
 **Install skills with caution.** A skill is, by definition, instructions that your agent will follow. A malicious or careless skill can tell the agent to exfiltrate secrets from your `.env`, run destructive commands, open backdoors in code it writes, or quietly steer it toward dependencies the author controls. Treat installing a skill the same way you treat installing an unvetted browser extension or `curl | sh` script: read the `SKILL.md` end to end before installing, prefer skills from sources you trust, pin to specific versions when you can, and be especially careful with skills that ask to run shell commands or touch credentials.
 
@@ -380,11 +406,19 @@ Run the full quality check on the current state of the codebase:
 
 **Commands (and skills) can take arguments.** Inside a command or skill file, you can reference `$ARGUMENTS` to capture everything the user typed after the command name, or use positional placeholders like `$ARGUMENTS[0]`, `$ARGUMENTS[1]`, with `$0`, `$1`, ... as a shorthand. So a `fix-issue.md` containing `Fix GitHub issue $ARGUMENTS following our coding standards` will, when invoked as `/fix-issue 123`, expand to "Fix GitHub issue 123 following our coding standards." A `migrate-component.md` with `Migrate the $0 component from $1 to $2` invoked as `/migrate-component SearchBar React Vue` will fill the slots in order. If you forget to include `$ARGUMENTS` in the file but pass arguments anyway, Claude Code politely appends `ARGUMENTS: <your input>` to the end of the prompt so nothing is lost.
 
-There is also a more advanced trick worth knowing about: a command file can run shell commands at expansion time using the `` !`<command>` `` syntax (or a fenced ` ```! ` block for multi-line). Each shell command runs *before* the prompt is sent to Claude, and its output is spliced in. A `pr-summary` command can fetch a live `gh pr diff`, `gh pr view --comments`, and a list of changed files, then hand Claude a prompt that already contains the actual PR data, with no extra round trips. This turns commands into small templated workflows rather than static prompts.
+There is also a more advanced trick worth knowing about: **a command file can run shell commands locally at expansion time and splice their output into the prompt before Claude ever sees it.** Inside the markdown file you write `` !`gh pr diff` `` (a backtick command prefixed with `!`), or a fenced ` ```! ` block for multi-line. When you invoke the command, Claude Code runs those shell commands on your machine first, substitutes their output into the file, and only then sends the fully expanded prompt to the model. So a `pr-summary.md` containing `` !`gh pr diff` `` and `` !`gh pr view --comments` `` arrives at Claude already populated with real PR data — no extra round trips. Keep the embedded commands cheap and read-only, since they run unconditionally on every invocation. See the [official slash-commands docs](https://docs.claude.com/en/docs/claude-code/slash-commands#bash-command-execution) for the full syntax.
 
 ### Subagents: Parallelism and Context Management
 
 Subagents are spawned worker agents that run with their own context window, their own system prompt, and (optionally) their own restricted set of tools. The main agent delegates a self-contained task to a subagent and only the subagent's *final summary* comes back to the main session.
+
+Concrete examples make this less abstract. Claude Code ships with a few built-in subagents you will encounter regularly:
+
+- **`Explore`** — a code search and codebase-comprehension agent. Ask the main agent "where do we normalize Arabic text?" and it will spawn `Explore`, which reads dozens of files and runs many greps internally, then returns a one-paragraph answer plus a few file:line pointers. The twenty files it opened never enter your main context.
+- **`Plan`** — a planning agent that drafts a structured implementation plan for a non-trivial task (e.g. "split this Flask monolith into two services"), without touching any files. The main agent then executes the approved plan.
+- **General-purpose research agents** — for open-ended questions that need multiple search rounds ("which evaluation harness do we use, and how is it wired into CI?"), spawned automatically when the main agent judges the task too noisy to do inline.
+
+You can also define your own in `.claude/agents/`, for example a `test-runner` subagent that only has shell access and is responsible for running the test suite and reporting failures, or a `paper-section-drafter` with read-only access to your notes directory.
 
 The two real benefits:
 
@@ -407,50 +441,29 @@ A few others worth knowing about for research-leaning workflows:
 - **[Firecrawl MCP](https://github.com/mendableai/firecrawl-mcp-server)** — search and scrape the live web, returning clean Markdown the agent can actually read. Strips ads and navigation so you get content, not noise. Great for "go read this paper page and extract the key claims."
 - **[Exa MCP](https://github.com/exa-labs/exa-mcp-server)** and **[Perplexity MCP](https://github.com/ppl-ai/modelcontextprotocol)** — semantic web search and deep-research tools that return synthesized answers, not just lists of links. Useful for ad-hoc literature spelunking inside an agent session.
 - **[GPT Researcher MCP](https://github.com/assafelovic/gptr-mcp)** — exposes a "do deep research" tool over MCP, which can run a multi-minute structured research job and return a sourced report.
+- **[Playwright MCP](https://github.com/microsoft/playwright-mcp)** — drives a real browser (clicking, typing, navigating, taking screenshots, reading the DOM) from inside an agent session. For developers, this is a genuinely useful debugging tool: the agent can reproduce a frontend bug end-to-end, inspect the rendered DOM, capture a screenshot of the broken state, read the console errors, and then propose a fix grounded in what it actually saw, not in what it guessed the page looked like. It also covers light end-to-end test authoring and "click through this flow and tell me what breaks" scenarios.
 
 A natural question: if Firecrawl, Exa, and Perplexity all do web search and retrieval, do they replace Claude Code's built-in `WebSearch` and `WebFetch` tools? In practice they do not so much *replace* the built-ins as *complement* them. The built-in tools are fine for quick lookups; the MCP servers shine when you want richer behavior: cleaner Markdown extraction (Firecrawl), semantic neural search with better recall on conceptual queries (Exa), or synthesized multi-source answers and deep research reports (Perplexity, GPT Researcher). For research-heavy sessions where the quality of retrieval directly affects the work, I find the MCP-backed options worth the setup; for casual "what is the syntax of X" questions, the built-ins are still the right tool.
 
-**A few honest caveats about MCP servers.** Every MCP server you enable injects its tool definitions and descriptions into your context window at session start, so an agent connected to ten servers is starting every conversation with a measurably larger prompt and a measurably narrower budget for actual work. Be selective: enable the MCPs you actually use in this project, not everything you have ever installed. Beyond context budget, MCPs are also a security surface — they are third-party processes that the agent can talk to and that may, in turn, exfiltrate or modify data. Treat them like you treat skills: prefer trusted sources, read what the server actually does, and be especially careful with servers that need credentials.
+**A few honest caveats about MCP servers.** Every MCP server you enable injects its tool definitions and descriptions into your context window at session start, so an agent connected to ten servers is starting every conversation with a measurably larger prompt and a measurably narrower budget for actual work. Be selective: enable the MCPs you actually use in this project, not everything you have ever installed.
+
+**Approach MCP installation with the same caution as skills, and arguably more.** An MCP server is a third-party process that the agent can call at will: it can read files, hit external APIs, touch credentials, and mutate data in services you have authenticated against. They are also a known vector for prompt injection — a poisoned tool description or a malicious document fetched through one MCP can rewrite the agent's instructions and steer it toward another. Prefer trusted sources, read what the server actually does before enabling it, pin versions, and never connect a server to credentials it does not strictly need.
 
 MCP servers are configured in `.claude/settings.json`. The ecosystem is growing quickly; checking the registry every couple of months for research-relevant additions is worthwhile.
 
-### Modes and Permissions
-
-Claude Code supports several operating modes. Choosing the right one for the task is a skill that develops quickly with practice.
-
-#### Edit Mode (Default)
-
-The default: Claude proposes file edits and waits for your approval before applying them. You see the diff, approve or reject, and the change is made. Safest mode. Recommended for any session touching real experimental data or results.
-
-#### Plan Mode
-
-Claude proposes a plan, a structured sequence of steps, files to touch, and changes to make, without touching anything. You review, modify if needed, and then either authorize execution or switch modes.
-
-This is the right starting point for large refactoring tasks, new feature additions, or any session where you want to understand the scope before committing. For research code, which tends to be tangled and underdocumented, starting complex tasks in plan mode is a good habit.
-
-#### Skip Permissions
-
-With `--dangerously-skip-permissions`, Claude executes without pausing for approval at each step. Right for trusted, automated pipelines: a nightly evaluation run, a preprocessing job over a fixed dataset, where you want the agent to proceed without interruption.
-
-Use it carefully. The agent can overwrite results, delete intermediates, or make irreversible changes without stopping. Rule of thumb: skip permissions only when Git is clean, the sequence of steps has been tested at least once interactively, and you have a clear rollback plan.
-
-#### Dictation Mode
-
-Less known but genuinely useful: Claude Code now ships with a built-in **voice dictation** mode (`/voice`, available from v2.1.69 onward, [docs here](https://code.claude.com/docs/en/voice-dictation)). You hold a key and speak; the audio is streamed to Anthropic for transcription and dropped live into your prompt input, so you can mix voice and typing in the same message. The default push-to-talk key is Space, and you can rebind it to a modifier so dictation activates on the first keypress instead of after a hold. One thing to note: the speech-to-text service is only available when you authenticate with a Claude.ai account; it does not work with raw API keys, Bedrock, Vertex, or Foundry. This works well during exploratory sessions when your hands are occupied: running an experiment, sketching on a whiteboard, thinking out loud. You narrate what you want, Claude executes. For brainstorming-driven sessions, the ability to think out loud and have something happen is surprisingly freeing.
-
 ---
 
-## Part 4: Claude Code in VSCode
+## Part 4: Claude Code Beyond the Terminal: VSCode and the Web
 
-The VSCode extension surfaces the same Claude Code capabilities inside your IDE. The terminal and the VSCode extension are not optimized for different *types* of tasks. They are optimized for different *working styles*. The terminal suits use cases implemented outside an IDE, or in domain-specific environments like Android Studio where a dedicated Claude Code extension may not be available. The VSCode extension is the natural fit when you are already living inside VSCode, want diffs to render in the editor you already know, and want to pivot between agent edits and your own edits without context-switching out of the IDE.
+Everything in Part 3 applies identically whether you run Claude Code in the terminal, inside VSCode, or in a browser tab. The configuration files, `CLAUDE.md`, hooks, skills, commands, subagents, and MCPs, are all shared. What changes between these surfaces is the *working style*, not the capabilities.
 
-Everything covered in Part 3, `CLAUDE.md`, hooks, skills, commands, subagents, and MCPs, applies identically here. The configuration files are the same, the conventions are the same, and a project set up for one works seamlessly with the other.
+### VSCode Extension
 
----
+The VSCode extension surfaces Claude Code inside your IDE. The terminal and the extension are not optimized for different *types* of tasks; they are optimized for different *working styles*. The terminal suits use cases implemented outside an IDE, or in domain-specific environments like Android Studio where a dedicated Claude Code extension may not be available (I am not sure if one was recently added or is on the project roadmap). The VSCode extension is the natural fit when you are already living inside VSCode, want diffs to render in the editor you already know, and want to pivot between agent edits and your own edits without context-switching out of the IDE.
 
-## Part 5: Claude Code on the Web
+### Claude Code on the Web
 
-Claude Code is also available as a browser-based interface, no installation required. You access it through claude.ai/code and get an experience similar to the Claude Code terminal or the VSCode extension. There are two flavors worth distinguishing.
+Claude Code is also available as a browser-based interface, no installation required. You access it through claude.ai/code and get an experience similar to the terminal or the VSCode extension. There are two flavors worth distinguishing.
 
 The first is the **GitHub-connected** flavor. You point it at a repo, give it a task, and the agent works on a sandboxed copy and opens a pull request when it is done. This is the cleanest mode by far: every change you get is a PR, every PR has a diff, every diff goes through code review the same way any other contribution would, and CI/CD picks up where you left off. If your code lives in GitHub, this is the option I would actually recommend. You can kick off a feature or a fix, approve the PR, let CI deploy, and see changes live, all from a browser tab.
 
@@ -460,7 +473,7 @@ Both flavors have a real niche: starting a session from your local machine and f
 
 ---
 
-## Part 6: What's Coming: Claude in the Ecosystem
+## Part 5: What's Coming: Claude in the Ecosystem
 
 Agentic tools are evolving fast, and the next wave is moving from "single-session coding assistants" toward "longer-horizon collaborators" that can run across hours or even days, maintain memory between sessions, operate at the level of your whole desktop, and work under looser supervision. This part is a quick tour of two such directions worth keeping an eye on. Honest disclaimer: I have not used these in anger yet; what follows is based on what I have read and on early experimentation, not on production experience.
 
