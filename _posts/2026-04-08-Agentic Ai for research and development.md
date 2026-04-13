@@ -6,6 +6,9 @@ tags: []     # TAG names should always be lowercase
 description: A walkthrough on using agentic AI to accelerate research and development workflows
 toc: true
 comments: true
+image:
+    path: assets/2026-04-08-Agentic Ai for research and development/claude-code-vscode.png
+    alt: Claude Code VSCode extension splash screen.
 ---
 
 ## Introduction
@@ -356,7 +359,7 @@ When I share a prompt, analyze it for:
 Then propose an improved version. Show your reasoning.
 ```
 
-A relatively new development: you no longer have to write every skill from scratch. **Skill marketplaces** have appeared (Anthropic's own [plugins page](https://claude.com/plugins), community indexes like [tonsofskills.com](https://tonsofskills.com/), and large open collections like [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) or [jeremylongshore/claude-code-plugins-plus-skills](https://github.com/jeremylongshore/claude-code-plugins-plus-skills)) where third parties publish ready-made skills you can install in one line, e.g. `/plugin marketplace add alirezarezvani/claude-skills` followed by `/plugin install <name>`. Concrete examples include CI/CD vendor packs that wire the agent into GitHub Actions or GitLab pipelines, and Git automation, testing, and code-review skill bundles. Cloud providers and SaaS vendors are starting to ship official skills the same way they ship SDKs, which means a chunk of "teach the agent how this tool works" can now be borrowed instead of written.
+A relatively new development: you no longer have to write every skill from scratch. **Skill marketplaces** have appeared (Anthropic's own [plugins page](https://claude.com/plugins), community indexes like [tonsofskills.com](https://tonsofskills.com/), and large open collections like [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) or [jeremylongshore/claude-code-plugins-plus-skills](https://github.com/jeremylongshore/claude-code-plugins-plus-skills)) where third parties publish ready-made skills you can install in one line, e.g. `/plugin marketplace add alirezarezvani/claude-skills` followed by `/plugin install <name>`. Concrete examples include CI/CD vendor packs that wire the agent into GitHub Actions or GitLab pipelines, and Git automation, testing, and code-review skill bundles. A notable example is **[Superpowers](https://github.com/obra/superpowers)**, a plugin that ships a complete development workflow built on composable skills: test-driven development with RED-GREEN-REFACTOR cycles, systematic debugging, code review, planning, subagent-driven parallel implementation, and Git worktree management for isolated branches — all triggered automatically through hooks without requiring explicit commands. Cloud providers and SaaS vendors are starting to ship official skills the same way they ship SDKs, which means a chunk of "teach the agent how this tool works" can now be borrowed instead of written.
 
 **Skills can take arguments too.** Just like commands (covered in the next section), a skill body can reference `$ARGUMENTS` to capture everything the user typed when invoking it, or use positional placeholders like `$0`, `$1`, `$2`. So a `fix-issue` skill containing `Fix GitHub issue $ARGUMENTS following our coding standards`, when invoked as `/fix-issue 123`, expands to "Fix GitHub issue 123 following our coding standards." This is what makes skills feel like small parameterized functions rather than static instruction sheets.
 
