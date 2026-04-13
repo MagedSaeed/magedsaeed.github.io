@@ -13,19 +13,19 @@ image:
 
 ## Introduction
 
-Many of us are witnessing the rapid advances in LLM development, and something has genuinely shifted in our daily workflows. It is not just that AI got smarter (though it did). It is not just that the tools got cheaper (though they did too). The real shift is that our interactions with LLMs are becoming agentic rather than chat-based. With proper agentic workflows, LLMs can now plan a sequence of actions, execute them, observe what happened, and revise. They can read files, run scripts on your behalf, search the web, and edit code, all without leaving the terminal, and without you micromanaging every step.
+Many of us are witnessing the rapid advances in LLM development, and something is genuinely ttansforming in our daily workflows. It is not just that AI got smarter (though it did). It is not just that the tools got better (though they did too). The actual transformation is that LLMs are not only chatting, they are getting more arms day by day. The are becoming agentic. With proper agentic workflows, LLMs can now plan a sequence of actions, execute them, observe what happened, and revise. They can read files, run scripts on your behalf, search the web, and edit code, all without leaving the terminal, and without you micromanaging every step.
 
-I have been using Claude Code as a primary tool of my research and development workflow for several months now, and I want to share what I learned. This article is for graduate students, researchers, and developers working in adjacent fields who are curious whether and how agentic AI can genuinely help.
+I have been using Claude Code as a primary assistant of my daily work for several months now, and I want to share what I learned. This article is for anyone curious to build better and more exciting workflows with LLMs in the agentic world.
 
-**One disclaimer up front:** most of this article covers *my* workflow. It has worked well for me, but I am sure there are sharper, smarter ways to do many of the things I do here that you may practice or follow. If you have your own setup, I would love to hear about it and also let others know about it. Consider this article an invitation to compare notes and workflows with a wider audience of similar interests.
+**One disclaimer up front:** most of this article covers *my* workflow. I am sure there are sharper, smarter ways to do many of the things I do here that you may be doing already. If you have your own setup, I would love to hear about it and also let others know about it. Consider this article an invitation to compare notes, spread the words, and workflows with a wider audience of similar interests.
 
 ### How to Read This Article
 
-This article is long on purpose. It is meant to be a reference someone can come back to, not a single-sitting read. A few suggestions to make it lighter:
+This article is long on purpose. It is meant to be a reference someone (including me) can come back to, not a single-sitting read. A few suggestions to make it lighter:
 
 - **Skip what you already know.** If you are comfortable with Git, jump past Part 1. If you have used Claude Code for a while, skim Parts 3 and 4 and slow down on hooks, skills, and subagents.
 - **Read by part, not by line.** Each part is self-contained. The table of contents on the side should be very helpful.
-- **The code blocks are illustrative, not prescriptive.** Adapt them to your stack. The shape of the workflow matters more than the exact configuration. You may search the net or consult claude itself to craft these code blocks better for your workflow.
+- **The code blocks are illustrative.** Adapt them to your stack. The shape of the workflow matters more than the exact configuration. You may search the net or even consult claude itself to craft these code blocks better for your workflow.
 
 ---
 
@@ -35,7 +35,7 @@ Before diving deeper, let us establish some common ground.
 
 ### What Makes AI "Agentic"?
 
-Say that you have two kinds of colleagues. The first is brilliant but passive: you describe a problem, he thinks it over and gives you advice, and the ball is back in your court to implement. The second is equally brilliant but active: you describe a problem, he sits next to you, opens your files, runs a few commands, reads the output, adjusts his approach, and hands you something working. Both are valuable. But when you are deep in a deadline, the second one changes your day.
+Consider two kinds of colleagues. The first is brilliant but passive: you describe a problem, he thinks it over and gives you advice, and the ball is back in your court to implement (or copy & paste). The second is equally brilliant but active: you describe a problem, he sits next to you, opens your files, runs a few commands, reads the output, adjusts his approach, and hands you something working. Both are valuable. But when you are deep in a deadline, the second one changes your day.
 
 A regular chat interface (like Claude.ai or ChatGPT) is the first colleague. You send a message, the model responds, and that is it. An *agentic* AI system is the second: it can use tools (execute bash commands, read and write files, call APIs, search the web), take multi-step actions, and self-correct based on what it observes. The core loop looks like this:
 
@@ -51,9 +51,9 @@ Claude Code and tools like it (Gemini CLI from Google, opencode from the open-so
 
 ## Part 1: Git as a Useful Practice
 
-Before we dive into the agentic world, I want to make an argument for something that might sound boring: proper Git practices are one of the most useful habits you can bring into an agentic workflow. This is true whether or not you use Agentic AI, but it becomes highly useful the moment an agent starts editing your files.
+Before we dive into the agentic world, I want to stress on something that might sound boring: proper Git practices are one of the most useful habits you can build or bring into an agentic workflow. This is true whether or not you use Agentic AI, but it becomes highly useful the moment an agent starts editing your files.
 
-When an agent can edit your files, rename functions, refactor modules, and create new scripts across dozens of files in a single session, you need a clean way to review, approve, and roll back those changes. Without Git, you are flying blind, trying to remember what changed and what did not. With Git, every agent action becomes a *diff* you can read, approve, reject, or revise. This shifts the question from "did the AI write good code?", which is hard to answer in the abstract, to "is this diff correct and do I understand it?", which is much easier to follow. In that sense, an interaction with an agentic system is best thought of as a small pull request with a well-defined scope: the agent proposes; you review; you merge, refine, or discard.
+When an agent can edit your files, rename functions, refactor modules, and create new scripts across dozens of files in a single session, you need a clean way to review, approve, and roll back those changes. Without Git, you are flying blind, trying to remember what changed and what did not. With Git, every agent action becomes a *diff* you can read, approve, reject, or revise. This shifts the question from "did the AI write good code?", which is hard to answer in the abstract, to "is this diff correct and do I understand it?", which is practical to ask and much easier to follow. In that sense, an interaction with an agentic system is best thought of as a small pull request with a well-defined scope: the agent proposes; you review; you merge, refine, or discard.
 
 Git also helps with something subtler: **cognitive load**. Agentic sessions move fast. The agent can touch ten files in a minute, and a long session can rack up dozens of changes before you realize you have lost track. Frequent commits act like checkpoints. They free your working memory: you do not need to remember what state the code was in five minutes ago, because Git remembers for you. When something goes wrong (and it will), `git diff` and `git reset` are far cheaper than trying to mentally reconstruct what the agent did.
 
@@ -61,8 +61,8 @@ Git also helps with something subtler: **cognitive load**. Agentic sessions move
 
 These tips are useful with or without an agentic workflow. They just become non-negotiable when an agent is involved.
 
-- **Commit after each meaningful action or completed feature.** Commit small, but commit when something is actually done, not in the middle of a half-baked refactor and not after a long session(s) with a dozen unrelated changes mixed together.
-- **Read diffs before committing.** Use the VSCode diff view, or `git diff` if you prefer the terminal. You do not need to understand every line, but you should have an overview of what is being committed. If you cannot summarize the diff in one sentence (i.e. the commit message), you will most probably lose control over your project later.
+- **Commit after each meaningful action, fixed bug, or completed feature.** Commit small, but commit when something is actually done, not in the middle of a half-baked refactor and not after a long session(s) with a dozen unrelated changes mixed together.
+- **Read diffs before committing.** Use the VSCode diff view, or `git diff` if you prefer the terminal (I do not :) ). You do not need to understand every line, but you should have an overview of what is being committed. If you cannot summarize the diff in one sentence (i.e. the commit message), you will most probably lose control over your project later.
 - **Write real commit messages.** Underrated but very useful, even if the only person reading them is future-you trying to understand what happened last week.
 - **Start agent sessions on a clean branch.** Optional but recommended: better not to run an agent on `main` directly. A branch named `experiment/arabic-ner-refactor` costs nothing and gives you a full rollback if the session goes sideways.
 
@@ -70,13 +70,13 @@ These tips are useful with or without an agentic workflow. They just become non-
 
 ## Part 2: AI Assistance for Research and Development Tasks
 
-Before discussing agentic systems, it is worth understanding what can be accomplished with an AI assistant through a good chat interface alone. This layer is especially useful for research, and most will get a lot of value out of it before they even need an agentic tool.
+Before discussing agentic systems, it is worth understanding what can be accomplished with an AI assistant through a chat interface alone. This layer is especially useful while validating, searching, and brainstorming, and most will get a lot of value out of it before they even need an agentic tool.
 
 The tasks that benefit most from AI assistance fall into a few natural categories.
 
 ### Writing and Communication
 
-Concrete things that work well here:
+For a given text (e.g your paper), concrete things that work well here:
 
 - Proofreading and grammar.
 - Tightening or shifting tone.
@@ -84,12 +84,13 @@ Concrete things that work well here:
 - Improving clarity.
 - Drafting reviewer responses.
 - Drafting abstracts and conclusions.
+- searching for related literature.
 
-One calibration worth making explicit here: the model tends toward verbosity. Left unconstrained, it produces fluent text that is slightly longer than your target. Build constraints into your prompts ("no more than 150 words", "single paragraph of around N lines", "short, elegant, and academically sounding") and you will get tighter, better-shaped outputs.
+One calibration worth making explicit here: the model tends toward verbosity. Left unconstrained, it produces fluent text that is slightly longer than your preference. Build constraints into your prompts ("no more than 150 words", "single paragraph of around N lines", "short, elegant, and academically sounding") and you will mostly get tighter, and bette outputs.
 
 ### Literature Review and Research Exploration
 
-The genuinely useful version of this is **deep research**: Gemini's deep research feature or Claude's research mode (where available) autonomously searches academic databases (arXiv, ScienceDirect, Semantic Scholar, ACL Anthology, etc.), reads papers, and synthesizes across sources over several minutes. For initial landscape exploration in a new subfield, this is remarkably useful. For anything that goes into a paper, it requires careful verification. Hallucinated citations (though they tend to be less frequent in deep-research mode than in plain chat against the model's training data) are a real risk with all current models, and niche subfields are particularly prone to this.
+The genuinely useful version of this is **deep research**: Gemini's deep research feature or Claude's research mode/deep research (where available) autonomously searches academic databases (arXiv, ScienceDirect, Semantic Scholar, ACL Anthology, etc.), reads papers, and synthesizes across sources over several minutes. For initial landscape exploration in a new subfield, this is remarkably useful. For anything rigorous that goes into a paper, it requires careful verification. Hallucinated citations (though they tend to be less frequent in deep-research mode than in plain chat against the model's training data) are a real risk with all current models, and niche subfields are particularly prone to this.
 
 A concrete example. I was interested in a small research question: what happens when you prompt an LLM to deliberately give a *wrong* answer choice to multiple-choice questions from MMLU-style benchmarks instead of the correct choice? Are there existing studies of that exact behavior? Actually, this question is interesting because it challenges the model's alignment and investigates its distribution (which wrong answer is it going to pick?). I asked Claude in deep research mode:
 
@@ -100,7 +101,7 @@ After the first pass, I followed up with some other questions:
 and (for more brainstorming ideas):
 > *you give a nice motivation for my work; what else could be done to make it better in terms of analysis and experiments?*
 
-Within a few minutes I had a structured map of the related literature that gave a clear view of the gap to position my work against, plus a list of suggested experiments and analyses. The end result of that conversation is in [this artifact](https://claude.ai/public/artifacts/0ec172ee-d69d-42dd-8e5d-0cdb86e4679d). It is not a substitute for reading the papers, but it shrank what would have been a few hours or even days of background search into a single afternoon.
+Within a few minutes I had a structured map of the related literature that gave a clear view of the gap to position my work against, plus a list of suggested experiments and analyses. The end result of that conversation is in [this artifact](https://claude.ai/public/artifacts/0ec172ee-d69d-42dd-8e5d-0cdb86e4679d). It is not a substitute for reading the papers, but it shrank what would have been a few hours or even days of background and related literature surf into a single afternoon.
 
 ### Brainstorming Research Methodology
 
@@ -112,7 +113,7 @@ For research and development workflows, AI assistants handle a wide range of tas
 
 - **Code explanation.** Paste an unfamiliar codebase section and ask what it does and what the edge cases are. Particularly valuable when inheriting someone else's research/developed code.
 - **API exploration.** "What is the correct way to use `Trainer` from HuggingFace Transformers for multi-GPU evaluation?" Faster than reading docs, though you should still verify against them.
-- **Debugging hypotheses.** Describe a bug and the relevant code; ask for a ranked list of likely causes.
+- **Debugging.** Describe a bug and the relevant code; ask for the causes.
 - **Architecture and framework comparisons.** "I am building a retrieval pipeline over 2M documents. What are the available indexers there? Compare LlamaIndex vs. Haystack vs. building it directly with FAISS plus a thin wrapper vs. other alternatives (you may search the net), given that I care most about reproducibility and want to swap embedding models cheaply." This is the kind of question where a chat interface shows value: it surfaces tradeoffs you might not have considered, asks about constraints, and forces to articulate your priorities.
 - **Migration and refactoring plans of developed software.** "Here is a Flask monolith that handles auth, ingestion, and inference. I want to split it into two services. Walk me through the cleanest way to do that, what to extract first, and what to leave alone." The model is a good thinking partner for these structural decisions; it will push back, suggest alternatives, and flag tradeoffs.
 - **Choosing the right tool for a one-off task.** "I need to deduplicate a 50GB JSONL of web text by near-duplicate detection. What is the lightest-weight approach that does not need a Spark cluster?" Five minutes of chat saves an afternoon of evaluating libraries.
