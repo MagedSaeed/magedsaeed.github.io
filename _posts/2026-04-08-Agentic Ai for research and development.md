@@ -528,11 +528,7 @@ If you try any of this and find a better way, please share your experience. I wi
 - [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Anthropic Academy (Skilljar) — free courses on Claude, Claude Code, and agent skills](https://anthropic.skilljar.com/)
 - [Context7 MCP server](https://context7.com)
-- [draw.io / diagrams.net](https://www.diagrams.net)
 - [Anthropic's prompt engineering guide](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)
 - [Model Context Protocol specification](https://modelcontextprotocol.io)
-- [uv, fast Python package manager](https://github.com/astral-sh/uv)
-- [python-fire, Python CLI from Google](https://github.com/google/python-fire)
-- [python-dotenv](https://github.com/theskumar/python-dotenv)
 
 ---
