@@ -17,7 +17,7 @@ Many of us are witnessing the rapid advances in LLM development, and something i
 
 I have been using Claude Code as a primary assistant of my daily work for several months now, and I want to share what I learned. This article is for anyone curious to build better and more exciting workflows with LLMs in the agentic world.
 
-**One disclaimer up front:** most of this article covers *my* workflow. I am sure there are sharper, smarter ways to do many of the things I do here that you may be doing already. If you have your own setup, I would love to hear about it and also let others know about it. Consider this article an invitation to compare notes, spread the words, and workflows with a wider audience of similar interests.
+**One disclaimer up front:** most of this article covers *my* workflow. I am sure there are sharper, smarter ways to do many of the things I do here that you may be doing already. Claude Code is also a fast-moving tool with a surface area that grows almost weekly, so this article does not attempt to cover every feature or corner case; it is always great to be updated and keep an eye of relevant official claude code sources. If you have your own setup, I would love to hear about it and also let others know about it. Consider this article an invitation to compare notes, spread the words, and workflows with a wider audience of similar interests.
 
 ### How to Read This Article
 
@@ -521,6 +521,8 @@ Concretely, the practices that I think make the biggest difference: lean on Git 
 That is roughly a week's worth of experiments. It is enough to give you a genuine sense of fit before you invest more, and enough to know whether this style of working is something you want to keep.
 
 If you try any of this and find a better way, please share your experience. I will be more than happy to hear these experiences and see these practices evolve on the way.
+
+> **Want to try Claude Code?** If this article got you curious and you do not have a subscription yet, you can sign up through [this referral link](https://claude.ai/referral/V-uY-0OuCw) to get a **free week of Claude Code**. The offer is limited to the first three readers who use the link, so it is first-come, first-served.
 
 ---
 
