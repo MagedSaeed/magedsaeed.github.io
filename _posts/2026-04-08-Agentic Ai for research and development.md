@@ -13,7 +13,7 @@ image:
 
 ## Introduction
 
-Many of us are witnessing the rapid advances in LLM development, and something is genuinely ttansforming in our daily workflows. It is not just that AI got smarter (though it did). It is not just that the tools got better (though they did too). The actual transformation is that LLMs are not only chatting, they are getting more arms day by day. The are becoming agentic. With proper agentic workflows, LLMs can now plan a sequence of actions, execute them, observe what happened, and revise. They can read files, run scripts on your behalf, search the web, and edit code, all without leaving the terminal, and without you micromanaging every step.
+Many of us are witnessing the rapid advances in LLM development, and something is genuinely transforming in our daily workflows. It is not just that AI got smarter (though it did). It is not just that the tools got better (though they did too). The actual transformation is that LLMs are not only chatting, they are getting more arms day by day. The are becoming agentic. With proper agentic workflows, LLMs can now plan a sequence of actions, execute them, observe what happened, and revise. They can read files, run scripts on your behalf, search the web, and edit code, all without leaving the terminal, and without you micromanaging every step.
 
 I have been using Claude Code as a primary assistant of my daily work for several months now, and I want to share what I learned. This article is for anyone curious to build better and more exciting workflows with LLMs in the agentic world.
 
