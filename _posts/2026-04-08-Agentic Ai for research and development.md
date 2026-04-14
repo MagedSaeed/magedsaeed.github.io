@@ -92,12 +92,13 @@ One calibration worth making explicit here: the model tends toward verbosity. Le
 
 The genuinely useful version of this is **deep research**: Gemini's deep research feature or Claude's research mode/deep research (where available) autonomously searches academic databases (arXiv, ScienceDirect, Semantic Scholar, ACL Anthology, etc.), reads papers, and synthesizes across sources over several minutes. For initial landscape exploration in a new subfield, this is remarkably useful. For anything rigorous that goes into a paper, it requires careful verification. Hallucinated citations (though they tend to be less frequent in deep-research mode than in plain chat against the model's training data) are a real risk with all current models, and niche subfields are particularly prone to this.
 
-A concrete example. I was interested in a small research question: what happens when you prompt an LLM to deliberately give a *wrong* answer choice to multiple-choice questions from MMLU-style benchmarks instead of the correct choice? Are there existing studies of that exact behavior? Actually, this question is interesting because it challenges the model's alignment and investigates its distribution (which wrong answer is it going to pick?). I asked Claude in deep research mode:
+A concrete example. I was interested in a small research question: what happens when you prompt an LLM to deliberately give a *wrong* answer choice to multiple-choice questions from MMLU-style benchmarks instead of the correct choice? Are there existing studies of that exact behavior? Actually, this question is interesting because it challenges the model's alignment (RLHF phase) and investigates its distribution (which wrong answer is it going to pick?). I asked Claude in deep research mode:
 
 > *I want you to do deep research on academic resources (arXiv, ScienceDirect, ICLR, ICML, ACL, etc.) and find any related research that studies multiple-choice benchmarks and how LLMs select answers. I am planning a study where I prompt the LLM to respond with a wrong answer instead of the right answer for an MCQ question (from popular MMLU-style benchmarks), and I am interested in any related work. Can you do that for me?*
 
 After the first pass, I followed up with some other questions:
 > *did you find anyone who exactly prompts the LLM to give wrong answers and then studies the behavior?*
+
 and (for more brainstorming ideas):
 > *you give a nice motivation for my work; what else could be done to make it better in terms of analysis and experiments?*
 
