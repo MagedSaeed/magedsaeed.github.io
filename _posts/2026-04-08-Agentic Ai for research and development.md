@@ -1,9 +1,9 @@
 ---
-title: "Claude Code for Research and Development: A Walkthrough Guide"
+title: "Claude Code for Research and Development: A Walkthrough"
 date: 2026-04-08
 categories: [LLMs, Agentic AI]
 tags: []     # TAG names should always be lowercase
-description: A walkthrough on using agentic AI to accelerate research and development workflows
+description: A walkthrough on using agentic LLMs to accelerate research and development workflows
 toc: true
 comments: true
 image:
