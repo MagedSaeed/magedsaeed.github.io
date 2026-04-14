@@ -110,12 +110,12 @@ A related use case is using the chat as a thinking and brainstorming partner for
 
 ### Development Tasks
 
-For research and development workflows, AI assistants handle a wide range of tasks well before you even open a terminal:
+For research and development workflows that involves coding, AI assistants handle a wide range of tasks well before you even open a terminal:
 
 - **Code explanation.** Paste an unfamiliar codebase section and ask what it does and what the edge cases are. Particularly valuable when inheriting someone else's research/developed code.
 - **API exploration.** "What is the correct way to use `Trainer` from HuggingFace Transformers for multi-GPU evaluation?" Faster than reading docs, though you should still verify against them.
-- **Debugging.** Describe a bug and the relevant code; ask for the causes.
-- **Architecture and framework comparisons.** "I am building a retrieval pipeline over 2M documents. What are the available indexers there? Compare LlamaIndex vs. Haystack vs. building it directly with FAISS plus a thin wrapper vs. other alternatives (you may search the net), given that I care most about reproducibility and want to swap embedding models cheaply." This is the kind of question where a chat interface shows value: it surfaces tradeoffs you might not have considered, asks about constraints, and forces to articulate your priorities.
+- **Debugging.** Describe a bug and the relevant code; ask for the causes then fix.
+- **Tools explorations and framework comparisons.** "I am building a retrieval pipeline over 2M documents. What are the available indexers there? Compare LlamaIndex vs. Haystack vs. building it directly with FAISS plus a thin wrapper vs. other alternatives (you may search the net), given that I care most about reproducibility and want to swap embedding models cheaply." This is the kind of question where a chat interface shows value: it surfaces tradeoffs you might not have considered, asks about constraints, and forces to articulate your priorities.
 - **Migration and refactoring plans of developed software.** "Here is a Flask monolith that handles auth, ingestion, and inference. I want to split it into two services. Walk me through the cleanest way to do that, what to extract first, and what to leave alone." The model is a good thinking partner for these structural decisions; it will push back, suggest alternatives, and flag tradeoffs.
 - **Choosing the right tool for a one-off task.** "I need to deduplicate a 50GB JSONL of web text by near-duplicate detection. What is the lightest-weight approach that does not need a Spark cluster?" Five minutes of chat saves an afternoon of evaluating libraries.
 
