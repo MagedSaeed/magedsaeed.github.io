@@ -520,7 +520,7 @@ Concretely, the practices that I think make the biggest difference: lean on Git 
 
 That is roughly a week's worth of experiments. It is enough to give you a genuine sense of fit before you invest more, and enough to know whether this style of working is something you want to keep.
 
-If you try any of this and find a better way, please share your experience. I will be more than happy to hear these experiences and see these practices evolve on the way.
+If you try any of this and find a better way, please share your experience. I will be more than happy to hear these experiences and see these practices evolve along the way.
 
 ---
 
