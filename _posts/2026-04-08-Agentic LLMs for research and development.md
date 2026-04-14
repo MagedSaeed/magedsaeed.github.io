@@ -173,7 +173,7 @@ using the STAR dataset. Evaluation framework is in `src/eval/`.
 - Distribute code across files. No monolithic scripts.
 
 ## Environment
-- The `.env` file at root contains all API keys and dataset paths.
+- The `.env` file at root contains all API keys and sensitive data.
   Load with `python-dotenv` in Python. Never hardcode credentials.
 - Dataset: `/data/star/` is read-only. Results go in `results/` with ISO date prefix.
 
@@ -184,9 +184,33 @@ using the STAR dataset. Evaluation framework is in `src/eval/`.
 ...
 ```
 
-Note the `.env` entry. This is a practical tip that applies to almost every project: a `.env` file at the project root, loaded via `python-dotenv` in Python (or `dotenv` in Node), contains all environment-specific values, including API keys, dataset paths, and server addresses. The agent respects it, your scripts use it, and nothing sensitive ever gets hardcoded.
+Note the `.env` entry. This is a practical tip that applies to almost every project: a `.env` file at the project root, loaded via `python-dotenv` in Python (or `dotenv` in Node), contains all environment-specific values, including API keys, sensitive details, and server addresses. The agent respects it, your scripts use it, and nothing sensitive ever gets hardcoded.
 
-For a research group, a shared `CLAUDE.md` at the repo root encodes group conventions (coding standards, dataset locations, paper style requirements) so every team member and every agent session operates consistently.
+For research groups or development teams, a shared `CLAUDE.md` at the repo root encodes group/team conventions (coding standards, dataset locations, paper style requirements) so every member and every agent operates consistently.
+
+### Modes and Permissions
+
+Before getting into the more advanced tricks (hooks, skills, commands, MCPs), it helps to understand the operating modes Claude Code runs in. Choosing the right one for the task is a skill that develops quickly with practice, and the rest of this section assumes you know which mode you are in.
+
+#### Edit Modes (Default)
+
+Claude Code gives two options here: either edit automatically or approve before editing. The default: Claude proposes file edits and waits for your approval before applying them. You see the diff, approve or reject, and the change is made. Safest mode. Recommended for any session touching real experimental data or results. But for non-sensitive edits, you can proceed with editing automatically.
+
+#### Plan Mode
+
+Claude proposes a plan, a structured sequence of steps, files to touch, and changes to make, without touching anything. You review and modify the plan if needed, and then either authorize execution or continue planning.
+
+This is the right starting point for large refactoring tasks, new feature additions, hard bugs, or any session where you want to understand the scope before committing. For research code, which tends to be tangled and underdocumented, starting complex tasks in plan mode is a good habit.
+
+#### Skip Permissions
+
+With `--dangerously-skip-permissions`, Claude executes without pausing for approval at each step. Right for trusted, automated pipelines: a nightly evaluation run, a preprocessing job over a dataset, where you want the agent to proceed without interruption.
+
+Use it carefully. The agent can overwrite results, delete intermediates, or make irreversible changes without stopping. Rule of thumb: skip permissions only when Git is clean, the sequence of steps has been tested at least once interactively, and you have a clear rollback plan.
+
+#### Dictation Mode
+
+Less known but genuinely useful: Claude Code now ships with a built-in **voice dictation** mode (`/voice`, available from Claude v2.1.69 onward, [docs here](https://code.claude.com/docs/en/voice-dictation)). You hold a key and speak; the audio is streamed to Anthropic for transcription and dropped live into your prompt input, so you can mix voice and typing in the same message. The default push-to-talk key is Space, and you can rebind it to a modifier so dictation activates on the first keypress instead of after a hold. One thing to note: the speech-to-text service is only available when you authenticate with a Claude.ai account; it does not work with raw API keys. This works well during exploratory sessions when your hands are occupied: running an experiment, sketching on a whiteboard, thinking out loud. You narrate what you want, Claude executes. For brainstorming-driven sessions, the ability to think out loud and have something happen feels exciting.
 
 ### Project Structure for Skills, Commands, and Hooks
 
@@ -215,30 +239,6 @@ your-project/
 ```
 
 Subagents are not files in the same sense; they are spawned during a session, as we will see shortly.
-
-### Modes and Permissions
-
-Before getting into the more advanced machinery (hooks, skills, commands, MCPs), it helps to understand the operating modes Claude Code runs in. Choosing the right one for the task is a skill that develops quickly with practice, and the rest of this section assumes you know which mode you are in.
-
-#### Edit Mode (Default)
-
-The default: Claude proposes file edits and waits for your approval before applying them. You see the diff, approve or reject, and the change is made. Safest mode. Recommended for any session touching real experimental data or results.
-
-#### Plan Mode
-
-Claude proposes a plan, a structured sequence of steps, files to touch, and changes to make, without touching anything. You review, modify if needed, and then either authorize execution or switch modes.
-
-This is the right starting point for large refactoring tasks, new feature additions, or any session where you want to understand the scope before committing. For research code, which tends to be tangled and underdocumented, starting complex tasks in plan mode is a good habit.
-
-#### Skip Permissions
-
-With `--dangerously-skip-permissions`, Claude executes without pausing for approval at each step. Right for trusted, automated pipelines: a nightly evaluation run, a preprocessing job over a fixed dataset, where you want the agent to proceed without interruption.
-
-Use it carefully. The agent can overwrite results, delete intermediates, or make irreversible changes without stopping. Rule of thumb: skip permissions only when Git is clean, the sequence of steps has been tested at least once interactively, and you have a clear rollback plan.
-
-#### Dictation Mode
-
-Less known but genuinely useful: Claude Code now ships with a built-in **voice dictation** mode (`/voice`, available from v2.1.69 onward, [docs here](https://code.claude.com/docs/en/voice-dictation)). You hold a key and speak; the audio is streamed to Anthropic for transcription and dropped live into your prompt input, so you can mix voice and typing in the same message. The default push-to-talk key is Space, and you can rebind it to a modifier so dictation activates on the first keypress instead of after a hold. One thing to note: the speech-to-text service is only available when you authenticate with a Claude.ai account; it does not work with raw API keys. This works well during exploratory sessions when your hands are occupied: running an experiment, sketching on a whiteboard, thinking out loud. You narrate what you want, Claude executes. For brainstorming-driven sessions, the ability to think out loud and have something happen feels exciting.
 
 ### Hooks: Automating Around the Agent
 
@@ -361,9 +361,9 @@ When I share a prompt, analyze it for:
 Then propose an improved version. Show your reasoning.
 ```
 
-A relatively new development: you no longer have to write every skill from scratch. **Skill marketplaces** have appeared (Anthropic's own [plugins page](https://claude.com/plugins), community indexes like [tonsofskills.com](https://tonsofskills.com/), and large open collections like [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) or [jeremylongshore/claude-code-plugins-plus-skills](https://github.com/jeremylongshore/claude-code-plugins-plus-skills)) where third parties publish ready-made skills you can install in one line, e.g. `/plugin marketplace add alirezarezvani/claude-skills` followed by `/plugin install <name>`. Concrete examples include CI/CD vendor packs that wire the agent into GitHub Actions or GitLab pipelines, and Git automation, testing, and code-review skill bundles. A notable example is **[Superpowers](https://github.com/obra/superpowers)**, a plugin that ships a complete development workflow built on composable skills: test-driven development with RED-GREEN-REFACTOR cycles, systematic debugging, code review, planning, subagent-driven parallel implementation, and Git worktree management for isolated branches — all triggered automatically through hooks without requiring explicit commands. Cloud providers and SaaS vendors are starting to ship official skills the same way they ship SDKs, which means a chunk of "teach the agent how this tool works" can now be borrowed instead of written.
+A relatively new development: you no longer have to write every skill from scratch. **Skill marketplaces** have appeared (Anthropic's own [plugins page](https://claude.com/plugins), community indexes like [tonsofskills.com](https://tonsofskills.com/), and large open collections like [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) or [jeremylongshore/claude-code-plugins-plus-skills](https://github.com/jeremylongshore/claude-code-plugins-plus-skills)) where third parties publish ready-made skills you can install, e.g. `/plugin marketplace add alirezarezvani/claude-skills` followed by `/plugin install <name>`. Concrete examples include CI/CD vendor packs that wire the agent into GitHub Actions or GitLab pipelines, and Git automation, testing, and code-review skill bundles. A notable example is **[Superpowers](https://github.com/obra/superpowers)**, a plugin that ships a complete development workflow built on composable skills: test-driven development with RED-GREEN-REFACTOR cycles, systematic debugging, code review, planning, subagent-driven parallel implementation, and Git worktree management for isolated branches — all triggered automatically through hooks without requiring explicit commands. Cloud providers and SaaS vendors are starting to ship official skills the same way they ship SDKs, which means a chunk of "teach the agent how this tool works" can now be borrowed instead of written.
 
-**Skills can take arguments too.** Just like commands (covered in the next section), a skill body can reference `$ARGUMENTS` to capture everything the user typed when invoking it, or use positional placeholders like `$0`, `$1`, `$2`. So a `fix-issue` skill containing `Fix GitHub issue $ARGUMENTS following our coding standards`, when invoked as `/fix-issue 123`, expands to "Fix GitHub issue 123 following our coding standards." This is what makes skills feel like small parameterized functions rather than static instruction sheets.
+**Skills can take arguments too.** Just like commands (covered in the next section), a skill body can reference `$ARGUMENTS` to capture everything the user typed when invoking it, or use positional placeholders like `$0`, `$1`, `$2`. So a `fix-issue` skill containing `Fix GitHub issue $ARGUMENTS following our coding standards`, when invoked as `/fix-issue 123`, expands to "Fix GitHub issue 123 following our coding standards." This is what makes skills feel like small parameterized functions rather than static instructions.
 
 **Install skills with caution.** A skill is, by definition, instructions that your agent will follow. A malicious or careless skill can tell the agent to exfiltrate secrets from your `.env`, run destructive commands, open backdoors in code it writes, or quietly steer it toward dependencies the author controls. Treat installing a skill the same way you treat installing an unvetted browser extension or `curl | sh` script: read the `SKILL.md` end to end before installing, prefer skills from sources you trust, pin to specific versions when you can, and be especially careful with skills that ask to run shell commands or touch credentials.
 
@@ -371,7 +371,7 @@ A relatively new development: you no longer have to write every skill from scrat
 
 Commands are slash-prefixed shortcuts for recurring workflows. Each command is a single markdown file in `.claude/commands/` (project-scoped) or `~/.claude/commands/` (global). The filename becomes the command name: `literature-review.md` becomes `/literature-review`. The contents of the file are the prompt that gets injected when you invoke the command. That is the entire mechanism, which is part of why it is so easy to build up a personal library.
 
-> **A note on the recent merge with skills.** Anthropic has effectively merged custom commands into skills: a file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and behave the same way. Existing `.claude/commands/` files keep working, so nothing in this section is broken. Skills just add optional features on top: a directory for supporting files, richer frontmatter, and the ability for Claude to load them automatically when relevant. If you are starting from scratch today, prefer skills; if you already have a `commands/` library, there is no rush to migrate.
+> **A note on the recent merge with skills.** Anthropic has recently merged custom commands into skills: a file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and behave the same way. Existing `.claude/commands/` files keep working, so nothing in this section is broken up to the time of writing this article. Keep an eye on the official docs for migration plans. Skills just add optional features on top: a directory for supporting files, richer frontmatter, and the ability for Claude to load them automatically when relevant. If you are starting from scratch today, prefer skills; if you already have a `commands/` library, there is no rush to migrate.
 
 **A useful starter command**, `.claude/commands/question-first.md`:
 ```markdown
@@ -380,7 +380,7 @@ change: ask me at least five clarifying questions. Do not assume anything. Do no
 proceed until I have answered all of them. Only then propose what you intend to do.
 ```
 
-The agent's instinct is to act. This command forces it to understand first. Especially valuable in research code, where a "simple fix" can have non-obvious effects on experimental results.
+The agent's instinct is to act. This command forces it to understand and question first. Especially valuable where a "simple fix" can have non-obvious effects on experimental results, or adding a small feature has an unnoticeable effect on another running feature.
 
 **`.claude/commands/literature-review.md`:**
 ```markdown
@@ -411,19 +411,19 @@ Run the full quality check on the current state of the codebase:
 
 **Commands (and skills) can take arguments.** Inside a command or skill file, you can reference `$ARGUMENTS` to capture everything the user typed after the command name, or use positional placeholders like `$ARGUMENTS[0]`, `$ARGUMENTS[1]`, with `$0`, `$1`, ... as a shorthand. So a `fix-issue.md` containing `Fix GitHub issue $ARGUMENTS following our coding standards` will, when invoked as `/fix-issue 123`, expand to "Fix GitHub issue 123 following our coding standards." A `migrate-component.md` with `Migrate the $0 component from $1 to $2` invoked as `/migrate-component SearchBar React Vue` will fill the slots in order. If you forget to include `$ARGUMENTS` in the file but pass arguments anyway, Claude Code politely appends `ARGUMENTS: <your input>` to the end of the prompt so nothing is lost.
 
-There is also a more advanced trick worth knowing about: **a command file can run shell commands locally at expansion time and splice their output into the prompt before Claude ever sees it.** Inside the markdown file you write `` !`gh pr diff` `` (a backtick command prefixed with `!`), or a fenced ` ```! ` block for multi-line. When you invoke the command, Claude Code runs those shell commands on your machine first, substitutes their output into the file, and only then sends the fully expanded prompt to the model. So a `pr-summary.md` containing `` !`gh pr diff` `` and `` !`gh pr view --comments` `` arrives at Claude already populated with real PR data — no extra round trips. Keep the embedded commands cheap and read-only, since they run unconditionally on every invocation. See the [official slash-commands docs](https://docs.claude.com/en/docs/claude-code/slash-commands#bash-command-execution) for the full syntax.
+There is also a more advanced trick worth knowing about: **a command file can run shell commands locally at expansion time and splice their output into the prompt before Claude ever sees it.** Inside the markdown file, you write `` !`gh pr diff` `` (a backtick command prefixed with `!`), or a fenced ` ```! ` block for multi-line. When you invoke the command, Claude Code runs those shell commands on your machine first, substitutes their output into the file, and only then sends the fully expanded prompt to the model. So a `pr-summary.md` containing `` !`gh pr diff` `` and `` !`gh pr view --comments` `` arrives at Claude already populated with real PR data — no extra round trips. Keep the embedded commands cheap and read-only, since they run unconditionally on every invocation. See the [official slash-commands docs](https://docs.claude.com/en/docs/claude-code/slash-commands#bash-command-execution) for the full syntax.
 
 ### Subagents: Parallelism and Context Management
 
-Subagents are spawned worker agents that run with their own context window, their own system prompt, and (optionally) their own restricted set of tools. The main agent delegates a self-contained task to a subagent and only the subagent's *final summary* comes back to the main session.
+Subagents are spawned worker agents that run with their own context window, their own system prompt, and (optionally) their own restricted set of tools. The main agent delegates a self-contained task to a subagent, and only the subagent's *final summary* comes back to the main session.
 
 Concrete examples make this less abstract. Claude Code ships with a few built-in subagents you will encounter regularly:
 
-- **`Explore`** — a code search and codebase-comprehension agent. Ask the main agent "where do we normalize Arabic text?" and it will spawn `Explore`, which reads dozens of files and runs many greps internally, then returns a one-paragraph answer plus a few file:line pointers. The twenty files it opened never enter your main context.
-- **`Plan`** — a planning agent that drafts a structured implementation plan for a non-trivial task (e.g. "split this Flask monolith into two services"), without touching any files. The main agent then executes the approved plan.
-- **General-purpose research agents** — for open-ended questions that need multiple search rounds ("which evaluation harness do we use, and how is it wired into CI?"), spawned automatically when the main agent judges the task too noisy to do inline.
+- **`Explore`**: a code search and codebase-comprehension agent. Ask the main agent "where do we normalize Arabic text?" and it will spawn `Explore`, which reads dozens of files and runs many greps internally, then returns a one-paragraph answer plus a few file:line pointers. The twenty files it opened never enter your main context.
+- **`Plan`**: a planning agent that drafts a structured implementation plan for a non-trivial task (e.g. "split this Flask monolith into two services"), without touching any files. The main agent then executes the approved plan.
+- **General-purpose research agents**: for open-ended questions that need multiple search rounds ("which evaluation harness do we use, and how is it wired into CI?"), spawned automatically when the main agent judges the task too noisy to do inline.
 
-You can also define your own in `.claude/agents/`, for example a `test-runner` subagent that only has shell access and is responsible for running the test suite and reporting failures, or a `paper-section-drafter` with read-only access to your notes directory.
+You can also define your own in `.claude/agents/`, for example, a `test-runner` subagent that only has shell access and is responsible for running the test suite and reporting failures, or a `paper-section-drafter` with read-only access to your notes directory.
 
 The two real benefits:
 
@@ -438,21 +438,21 @@ In practice, you do not always invoke subagents explicitly. The main agent will 
 
 MCP (Model Context Protocol) servers extend Claude Code's reach beyond your local file system. They are plugins that give the agent access to external data sources, services, and tools through a standard interface.
 
-**Context7** is the one I would install first as a researcher-developer. It gives the agent access to up-to-date documentation for frameworks and libraries: HuggingFace Transformers, PyTorch, scikit-learn, and many others. This matters because model training data has a cutoff, meaning API knowledge can be outdated. With Context7, when the agent writes code using `transformers`, it fetches the *current* documentation for the version you are on first. Deprecated function calls become much rarer.
+**Context7** is a very nice example of these MCPs. It gives the agent access to up-to-date documentation for frameworks and libraries: HuggingFace Transformers, PyTorch, scikit-learn, and many others. This matters because model training data has a cutoff, meaning API knowledge can be outdated. With Context7, when the agent writes code using `transformers`, it fetches the *current* documentation for the version you are on first. Deprecated function calls become much rarer.
 
 A few others worth knowing about for research-leaning workflows:
 
-- **[GitHub MCP](https://github.com/github/github-mcp-server)** — interact with issues, pull requests, releases, and repository metadata. Useful if you manage your research project as a GitHub repository, which, given Part 1, you probably should.
-- **[Firecrawl MCP](https://github.com/mendableai/firecrawl-mcp-server)** — search and scrape the live web, returning clean Markdown the agent can actually read. Strips ads and navigation so you get content, not noise. Great for "go read this paper page and extract the key claims."
-- **[Exa MCP](https://github.com/exa-labs/exa-mcp-server)** and **[Perplexity MCP](https://github.com/ppl-ai/modelcontextprotocol)** — semantic web search and deep-research tools that return synthesized answers, not just lists of links. Useful for ad-hoc literature spelunking inside an agent session.
-- **[GPT Researcher MCP](https://github.com/assafelovic/gptr-mcp)** — exposes a "do deep research" tool over MCP, which can run a multi-minute structured research job and return a sourced report.
-- **[Playwright MCP](https://github.com/microsoft/playwright-mcp)** — drives a real browser (clicking, typing, navigating, taking screenshots, reading the DOM) from inside an agent session. For developers, this is a genuinely useful debugging tool: the agent can reproduce a frontend bug end-to-end, inspect the rendered DOM, capture a screenshot of the broken state, read the console errors, and then propose a fix grounded in what it actually saw, not in what it guessed the page looked like. It also covers light end-to-end test authoring and "click through this flow and tell me what breaks" scenarios.
+- **[GitHub MCP](https://github.com/github/github-mcp-server)**: interact with issues, pull requests, releases, and repository metadata. Useful if you manage your research project as a GitHub repository, which, given Part 1, you probably should.
+- **[Firecrawl MCP](https://github.com/mendableai/firecrawl-mcp-server)**: search and scrape the live web, returning clean Markdown the agent can actually read. Strips ads and navigation so you get content, not noise. Great for "go read this paper page and extract the key claims."
+- **[Exa MCP](https://github.com/exa-labs/exa-mcp-server)** and **[Perplexity MCP](https://github.com/ppl-ai/modelcontextprotocol)**: semantic web search and deep-research tools that return synthesized answers, not just lists of links. Useful for ad-hoc literature surveys inside an agent session.
+- **[GPT Researcher MCP](https://github.com/assafelovic/gptr-mcp)**: exposes a "do deep research" tool over MCP, which can run a multi-minute structured research job and return a sourced report.
+- **[Playwright MCP](https://github.com/microsoft/playwright-mcp)**: drives a real browser (clicking, typing, navigating, taking screenshots, reading the DOM) from inside an agent session. For developers, this is a genuinely useful debugging tool: the agent can reproduce a frontend bug end-to-end, inspect the rendered DOM, capture a screenshot of the broken state, read the console errors, and then propose a fix grounded in what it actually saw, not in what it guessed the page looked like. It also covers light end-to-end test authoring and "click through this flow and tell me what breaks" scenarios.
 
-A natural question: if Firecrawl, Exa, and Perplexity all do web search and retrieval, do they replace Claude Code's built-in `WebSearch` and `WebFetch` tools? In practice they do not so much *replace* the built-ins as *complement* them. The built-in tools are fine for quick lookups; the MCP servers shine when you want richer behavior: cleaner Markdown extraction (Firecrawl), semantic neural search with better recall on conceptual queries (Exa), or synthesized multi-source answers and deep research reports (Perplexity, GPT Researcher). For research-heavy sessions where the quality of retrieval directly affects the work, I find the MCP-backed options worth the setup; for casual "what is the syntax of X" questions, the built-ins are still the right tool.
+A question here: if Firecrawl, Exa, and Perplexity all do web search and retrieval, do they replace Claude Code's built-in `WebSearch` and `WebFetch` tools? In practice, they do not so much *replace* the built-ins as *complement* them. The built-in tools are fine for quick lookups; the MCP servers shine when you want richer behavior: cleaner Markdown extraction (Firecrawl), semantic neural search with better recall on conceptual queries (Exa), or synthesized multi-source answers and deep research reports (Perplexity, GPT Researcher). For research-heavy sessions where the quality of retrieval directly affects the work, MCP-backed options are worth the setup; for casual "what is the syntax of X" questions, the built-ins are still the right tool.
 
 **A few honest caveats about MCP servers.** Every MCP server you enable injects its tool definitions and descriptions into your context window at session start, so an agent connected to ten servers is starting every conversation with a measurably larger prompt and a measurably narrower budget for actual work. Be selective: enable the MCPs you actually use in this project, not everything you have ever installed.
 
-**Approach MCP installation with the same caution as skills, and arguably more.** An MCP server is a third-party process that the agent can call at will: it can read files, hit external APIs, touch credentials, and mutate data in services you have authenticated against. They are also a known vector for prompt injection — a poisoned tool description or a malicious document fetched through one MCP can rewrite the agent's instructions and steer it toward another. Prefer trusted sources, read what the server actually does before enabling it, pin versions, and never connect a server to credentials it does not strictly need.
+**Approach MCP installation with the same caution as skills, and arguably more.** An MCP server is a third-party process that the agent can call at will: it can read files, hit external APIs, touch credentials, and mutate data in services you have authenticated against. They are also a known vector for prompt injection, a poisoned tool description, or a malicious document fetched through one MCP can rewrite the agent's instructions and steer it toward another. Prefer trusted sources, read what the server actually does before enabling it, pin versions, and never connect a server to credentials it does not strictly need.
 
 MCP servers are configured in `.claude/settings.json`. The ecosystem is growing quickly; checking the registry every couple of months for research-relevant additions is worthwhile.
 
@@ -460,19 +460,19 @@ MCP servers are configured in `.claude/settings.json`. The ecosystem is growing 
 
 ## Part 4: Claude Code Beyond the Terminal: VSCode and the Web
 
-Everything in Part 3 applies identically whether you run Claude Code in the terminal, inside VSCode, or in a browser tab. The configuration files, `CLAUDE.md`, hooks, skills, commands, subagents, and MCPs, are all shared. What changes between these surfaces is the *working style*, not the capabilities.
+Everything in Part 3 applies identically whether you run Claude Code in the terminal, inside VSCode, or in a browser tab. The configuration files, `CLAUDE.md`, hooks, skills, commands, subagents, and MCPs, are all shared with some niche differences (e.g. voice dictation is not working in the VSCode extension yet). What changes between these surfaces is the *working style*, not the capabilities.
 
 ### VSCode Extension
 
-The VSCode extension surfaces Claude Code inside your IDE. The terminal and the extension are not optimized for different *types* of tasks; they are optimized for different *working styles*. The terminal suits use cases implemented outside an IDE, or in domain-specific environments like Android Studio where a dedicated Claude Code extension may not be available (I am not sure if one was recently added or is on the project roadmap). The VSCode extension is the natural fit when you are already living inside VSCode, want diffs to render in the editor you already know, and want to pivot between agent edits and your own edits without context-switching out of the IDE.
+The VSCode extension surfaces Claude Code inside your IDE. The terminal and the extension are not optimized for different *types* of tasks; they are optimized for different *working styles*. The terminal suits use cases implemented outside an IDE, or in domain-specific environments like Android Studio, where a dedicated Claude Code extension may not be available (I am not sure if one was recently added). The VSCode extension is the natural fit when you are already living inside VSCode, want diffs to render in the editor you already know, and want to pivot between agent edits and your own edits without context-switching out of the IDE.
 
 ### Claude Code on the Web
 
 Claude Code is also available as a browser-based interface, no installation required. You access it through claude.ai/code and get an experience similar to the terminal or the VSCode extension. There are two flavors worth distinguishing.
 
-The first is the **GitHub-connected** flavor. You point it at a repo, give it a task, and the agent works on a sandboxed copy and opens a pull request when it is done. This is the cleanest mode by far: every change you get is a PR, every PR has a diff, every diff goes through code review the same way any other contribution would, and CI/CD picks up where you left off. If your code lives in GitHub, this is the option I would actually recommend. You can kick off a feature or a fix, approve the PR, let CI deploy, and see changes live, all from a browser tab.
+The first is the **GitHub-connected** flavor. You point it at a repo, give it a task, and the agent works on a sandboxed copy and opens a pull request when it is done. This is the cleanest mode by far: every change you get is a PR, every PR has a diff, every diff goes through code review the same way any other contribution would, and CI/CD picks up where you left off. If your code lives in GitHub, this is a recommended option. You can kick off a feature or a fix, approve the PR, let CI deploy, and see changes live, all from a browser tab.
 
-The second flavor connects the web UI to your **local machine** as a remote. The agent runs against your filesystem from the browser, which is convenient for picking up a session away from your desk. The friction here is exactly what you would expect: it is harder to verify diffs in real time, because the canonical diff view is back on the machine the agent is touching. In practice, you end up tabbing back to your laptop (or to the VSCode extension running there) to review the source-control panel and `git diff`. It is fine for small follow-ups, but for anything substantive I would still treat the local machine as the place where review and commits happen.
+The second flavor connects the web UI to your **local machine** as a remote. The agent runs against your filesystem from the browser, which is convenient for picking up a session away from your desk. The friction here is exactly what you would expect: it is harder to verify diffs in real time, because the canonical diff view is back on the machine the agent is touching. In practice, you end up tabbing back to your laptop (or to the VSCode extension running there) to review the source-control panel and `git diff`. It is fine for small follow-ups, but for anything substantive, the local machine is a recommended place where reviews and commits happen.
 
 Both flavors have a real niche: starting a session from your local machine and following it up from your phone while you are away from your desk.
 
@@ -486,7 +486,7 @@ Agentic tools are evolving fast, and the next wave is moving from "single-sessio
 
 Anthropic recently introduced **Claude Cowork**, an agentic tool built into the Claude desktop app that turns Claude into something closer to a digital coworker than a coding assistant. Unlike Claude Code, which lives in your terminal or IDE and operates on a project, Cowork is positioned at the level of your whole desktop: you can point it at a folder full of receipt screenshots and ask for an expense spreadsheet, hand it a chaotic Downloads folder and ask it to be reorganized, or ask it to draft a document from notes scattered across your machine. Recent updates went further still and let Cowork (and Claude Code) directly control a Mac or Windows desktop, clicking, typing, navigating apps, and finishing entire workflows on your behalf, even when you are not at the keyboard. There is also a "Dispatch" layer that lets you send tasks from the Claude mobile app to the Cowork agent running on your desktop.
 
-For research, this opens up interesting territory: long grid searches with ablations, monitoring training runs and making adaptive decisions, continuously updated literature reviews as new papers appear, or simply the everyday "rename and reorganize this pile of files" work that eats afternoons. The honest caveat is the same as it has always been with looser-supervision agents: this is early technology, and for tasks touching real experimental data or sensitive environments, dialing down human oversight too aggressively is a risk. The direction is clear, though, and worth following closely.
+For research, this opens up interesting territory: long grid searches with ablations, monitoring training runs and making adaptive decisions, continuously updated literature reviews as new papers appear, or simply the everyday "rename and reorganize this pile of files" work that eats afternoons. The honest caveat is the same as it has always been with looser-supervision agents: this is early technology, and for tasks touching real experimental data or sensitive environments, dialing down human oversight too aggressively is a risk. Plus, keep an eye on privacy and sensitive data (e.g you do not want an LLM to be trained on your personal/organization data). The direction is clear, though, and worth following closely.
 
 ### OpenClaw
 
@@ -498,17 +498,17 @@ The honest caveats: setup is heavier (Docker, Python environments, sandboxing, s
 
 ## Limits, Caveats, and Research Integrity
 
-Agentic AI changes how fast you can move, but it does not change who is responsible for the output. A few limits worth taking seriously.
+Agentic AI changes how fast you can move, but it does not change who is responsible for the output. A few limits that are worth taking seriously.
 
-**Hallucinated citations are the most practically dangerous failure mode.** Fabricated paper titles, wrong author lists, incorrect venues, all packaged with confident formatting. The cautionary tale outside research is *Mata v. Avianca, Inc.* (2023), where two New York attorneys submitted a brief containing six entirely fabricated cases generated by ChatGPT, including invented quotations and citations. They were sanctioned $5,000 by the court, and the case became a national headline ([CNN coverage](https://www.cnn.com/2023/05/27/business/chat-gpt-avianca-mata-lawyers), [Wikipedia summary](https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc.)). The same failure mode applies to academic citations; the difference is only that the consequences are slower and quieter. **Always verify references independently, without exception.** Never copy a reference list generated by any LLM without checking each entry against the actual source.
+**Hallucinogens are more dangerous than you think.** Consider the cases of fabricated paper titles, wrong author lists, wrong financial reports based on hallucinated deep research results, bad code design that hits the database hundreds of times every second, all packaged with confident, formatted responses. The cautionary tale is *Mata v. Avianca, Inc.* (2023), where two New York attorneys submitted a brief containing six entirely fabricated cases generated by ChatGPT, including invented quotations and citations. Their case became a national headline ([CNN coverage](https://www.cnn.com/2023/05/27/business/chat-gpt-avianca-mata-lawyers), [Wikipedia summary](https://en.wikipedia.org/wiki/Mata_v._Avianca,_Inc.)). You may also have heard news about consulting companies delivering fabricated reports with incorrect numbers that could lead to poor managerial decisions. The same failure mode applies to academic citations; the difference is only that the consequences are slower and quieter. **Always verify references and critical information independently, without exception.** Never copy a reference list generated by any LLM without checking each entry against the actual source.
 
 **Code hallucination is even more insidious**, because the agent produces plausible-looking code with confident presentation, which lowers your guard. Off-by-one errors, wrong default parameters, deprecated APIs: these are common. The diff-review habit from Part 1 catches most of them, and the lint-and-test hooks from Part 3 catch others. Neither is a substitute for understanding what you are committing.
 
-**Maintenance burden is the part nobody warns you about.** The agent makes it cheap to *write* code, but writing was never the bottleneck. Reading, understanding, debugging, and maintaining code is the bottleneck, and AI-generated code that you only half-understand becomes future-you's problem. A 2,000-line module produced in an afternoon costs the same to maintain as one you wrote yourself, except that you have less mental model of why each piece exists. Agent-generated code should be considered with care as you would consider code from a contractor: review it like you will own it, because you will.
+**Maintenance burden is the part nobody warns you about.** The agent makes it cheap to *write* code, but writing was never the bottleneck. Reading, understanding, debugging, and maintaining the code or even architecting the software from the first place is the bottleneck, and AI-generated code that you only half-understand becomes future-you's problem. A 2,000-line module produced in an afternoon costs the same to maintain as one you wrote yourself, except that you have less mental model of why each piece exists. Agent-generated code should be considered with care, as you would consider code from a contractor: review it like you will own it, because you will.
 
-**On reproducibility**: an agent session is not reproducible the way a script run is. The same prompt with the same context can produce different outputs. The committed artifact is your reproducible output. Treat the interaction itself as scaffolding, not as the deliverable.
+**On reproducibility**: an agent session is not reproducible the way a script run is. The same prompt with the same context can produce different outputs even with the same LLM. The committed artifact is your reproducible output. Treat the interaction itself as scaffolding, not as the deliverable.
 
-The goal of all of this is not to remove the human factor from the loop. It is to remove the *friction* between the human and their best work. The insight, the judgment, the intellectual contribution: that is still yours. At the end of the day, the agent is part of a machine that will never be held accountable for the submitted artifact. The human will.
+The goal of all of this is not to completely remove the human factor from the loop (at least at the current moment). It is to remove the *friction* between the human and their best work. The insight, the judgment, the intellectual contribution: that is still yours. At the end of the day, the agent is part of a machine that will never be held accountable for the submitted artifact. The human will.
 
 ---
 
@@ -516,9 +516,9 @@ The goal of all of this is not to remove the human factor from the loop. It is t
 
 If I had to distill this article into a single sentence, it would be this: **start building collaboration habits, workflows, and practices with LLMs and agentic tools**. The tools matter less than the habits and practices.
 
-Concretely, the practices that I think make the biggest difference: lean on Git as your safety net and reading aid. Define your conventions in `CLAUDE.md`. Use plan mode before acting on complex tasks. Build commands and skills for recurring workflows. Automate quality checks with hooks. Use subagents to keep your main context clean. And carefully verify everything you produce with an LLM.
+Concretely, the practices that I think make the biggest difference: Practice Git. Define your conventions in `CLAUDE.md` and skills. Use plan mode before acting on complex tasks. Build commands/skills for recurring workflows. Automate quality checks with hooks. Use subagents to keep your main context clean and expedite your work. And carefully verify everything you produce with an LLM.
 
-That is roughly a week's worth of experiments. It is enough to give you a genuine sense of fit before you invest more, and enough to know whether this style of working is something you want to keep.
+That is roughly a week's worth of experimentation. It is enough to give you a genuine sense of fit before you invest more, and enough to know whether this style of working is something you want to keep.
 
 If you try any of this and find a better way, please share your experience. I will be more than happy to hear these experiences and see these practices evolve along the way.
 
